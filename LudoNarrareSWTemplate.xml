@@ -1,0 +1,133 @@
+<?xml version="1.0"?>
+<!-- Template for LudoNarrare story world definition file -->
+<Storyworld name="..." userEntity="...">
+	
+	<!-- Story World Attributes -->
+	<!-- Attribute Template
+	<Attribute name="..." />
+	-->
+	
+	<!-- Relationship Template
+	<Relationship name ="..." object="..." />
+	-->
+
+	<!-- Entity Template
+	<Entities>
+		<Entity name="...">
+			<Attributes>
+				<Attribute />
+				...
+			</Attributes>
+			<Relationships>
+				<Relationship />
+				...
+			</Relationships>	
+			<Obligations name="..." />
+				<Obligation name="..." />
+				...
+			</Obligations?
+			<Goals name="..." />	
+				<Goal name="..." />
+				...
+			</Goals>
+			<Behaviors>
+				<Behavior name="..." chance="..."/>
+				...
+			</Behaviors>				
+		</Entity>
+	</Entities>
+	-->
+	
+	<!-- Condition Template
+	<Condition 
+	name="..." 
+	subject="..." 
+	negate="..." 
+	(attribute="..." 
+	|| (relationship="..." object="...")) 
+	/>
+	-->
+	
+	<!-- Operator Template
+	<Operator 
+	name="..." 
+	subject="..." 
+	type="..." (
+	attribute="..." 
+	|| (relationship="..." object="...") 
+	|| obligation="..." 
+	|| (goal="..." goalVariable="...")
+	|| (behavior="..." chance="...")) 
+	/>
+	-->
+	
+	<!-- End Condition Template 
+	<EndConditions>
+		<Condition />
+		<Condition />
+		<Condition />
+		...
+	</EndConditions>
+	-->
+	
+	<!-- Verb Template
+	<Verbs>
+		<Verb name="...">
+			<Variables>
+				<Variable name="?..." />
+				...
+			</Variables>
+			<Output>
+				<Out text="..." />
+				...
+			</Output>
+			<Conditions>
+				<Condition />
+				<Condition />
+				<Condition />
+				...
+			</Conditions>
+			<Operators>
+				<Operator />
+				<Operator />
+				<Operator />
+				...
+			</Operators>
+		</Verb>
+		...
+	</Verbs>
+	-->
+
+	<!-- Obligations Template
+	<Obligations>
+		<Obligation name="..." verb="...">
+			<Conditions>
+				<Condition />
+				<Condition />
+				<Condition />
+				...
+			</Conditions>
+		</Obligation>
+	</Obligations>
+	-->
+
+	<!-- Goals Template
+	<Goals>
+		<Goal name="...">
+			<Operator />
+		</Goal>
+	</Goals>
+	-->
+	
+	<!-- Behaviors Template
+	<Behaviors>
+		<Behavior
+		name="..."
+		verb="..."
+		chance="..."
+		/>
+		...
+	</Behaviors>
+	-->
+	
+</Storyworld>

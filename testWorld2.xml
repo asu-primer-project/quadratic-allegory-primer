@@ -1,0 +1,381 @@
+<?xml version="1.0"?>
+<StoryWorld name="Cookie Time" userEntity="Jane">
+	
+	<Entities>
+		<Entity name="Jane">
+			<Attributes>
+				<Attribute name="Human"/>
+				<Attribute name="Female" />
+				<Attribute name="Tall" />
+				<Attribute name="Happy" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Loves" object="Spot" />
+			</Relationships>	
+			<Obligations>
+				<Obligation name="Pet Dog" />
+			</Obligations>
+			<Goals> 
+				<Goal name="Find cookies" />
+			</Goals>	
+			<Behaviors>
+				<Behavior name="Room search" chance="5" />
+				<Behavior name="Wait" chance="2" />
+			</Behaviors>			
+		</Entity>
+		
+		<Entity name="Spot">
+			<Attributes>
+				<Attribute name="Dog" />
+				<Attribute name="Brown" />
+				<Attribute name="Happy" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Loves" object="Jane" />
+			</Relationships>	
+			<Obligations>
+				<Obligation name="Eat cookies" />
+			</Obligations>
+			<Behaviors>
+				<Behavior name="Room search" chance="3" />
+				<Behavior name="Wait" chance="3" />
+			</Behaviors>			
+		</Entity>
+		
+		<Entity name="Cookie Jar">
+			<Relationships>
+				<Relationship name="At" object="Kitchen A" />
+			</Relationships>			
+		</Entity>
+		
+		<Entity name="Kitchen A">
+			<Attributes>
+				<Attribute name="Location" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Connected" object="Kitchen B" />
+				<Relationship name="Connected" object="Kitchen C" />
+				<Relationship name="Connected" object="Kitchen D" />
+			</Relationships>
+		</Entity>
+		
+		<Entity name="Kitchen B">
+			<Attributes>
+				<Attribute name="Location" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Connected" object="Kitchen A" />
+			</Relationships>
+		</Entity>
+		
+		<Entity name="Kitchen C">
+			<Attributes>
+				<Attribute name="Location" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Connected" object="Kitchen A" />
+				<Relationship name="Connected" object="Kitchen D" />
+			</Relationships>
+		</Entity>
+
+		<Entity name="Kitchen D">
+			<Attributes>
+				<Attribute name="Location" />
+			</Attributes>
+			<Relationships>
+				<Relationship name="Connected" object="Kitchen A" />
+				<Relationship name="Connected" object="Kitchen C" />
+			</Relationships>
+		</Entity>
+	</Entities>
+	
+	<EndConditions>
+		<Condition 
+		name="Jane finds cookies" 
+		subject="Jane" 
+		negate="false" 
+		relationship="Has" 
+		object="Cookie Jar"
+		/>
+	</EndConditions>
+	
+	<Verbs>
+		<Verb name="Wait">
+			<Variables>
+			</Variables>
+			<Output>
+			</Output>
+			<Conditions>
+			</Conditions>
+			<Operators>
+			</Operators>
+		</Verb>
+	
+		<Verb name="Walk">
+			<Variables>
+				<Variable name="?me" />
+				<Variable name="?fromLocation" />
+				<Variable name="?toLocation" />
+			</Variables>
+			<Output>
+				<Out text="?me" />
+				<Out text="walks to" />
+				<Out text="?location" />
+			</Output>
+			<Conditions>
+				<Condition 
+				name="From location is location" 
+				subject="?fromLocation" 
+				negate="false" 
+				attribute="Location"
+				/>
+				<Condition 
+				name="To location is location" 
+				subject="?me" 
+				negate="false" 
+				attribute="Location"
+				/>
+				<Condition 
+				name="Me in from location" 
+				subject="?me" 
+				negate="false" 
+				relationship="At" 
+				object="?fromLocation" 
+				/>
+				<Condition 
+				name="Path leading from location to location" 
+				subject="?fromLocation" 
+				negate="false" 
+				relationship="Connected" 
+				object="?toLocation" 
+				/>
+			</Conditions>
+			<Operators>
+				<Operator 
+				name="Exit from location" 
+				subject="?me" 
+				type="remove"
+				relationship="At" 
+				object="?fromLocation"
+				/>
+				<Operator 
+				name="Enter to location" 
+				subject="?me" 
+				type="add"
+				relationship="At" 
+				object="?toLocation"
+				/>
+			</Operators>
+		</Verb>
+		<!--
+		<Verb name="Grab">
+			<Variables>
+				<Variable name="?..." />
+				...
+			</Variables>
+			<Output>
+				<Out text="..." />
+				...
+			</Output>
+			<Conditions>
+
+			</Conditions>
+			<Operators>
+
+			</Operators>
+		</Verb>
+		
+		<Verb name="Eat">
+			<Variables>
+				<Variable name="?..." />
+				...
+			</Variables>
+			<Output>
+				<Out text="..." />
+				...
+			</Output>
+			<Conditions>
+
+			</Conditions>
+			<Operators>
+
+			</Operators>
+		</Verb>
+		
+		<Verb name="Pet">
+			<Variables>
+				<Variable name="?..." />
+				...
+			</Variables>
+			<Output>
+				<Out text="..." />
+				...
+			</Output>
+			<Conditions>
+
+			</Conditions>
+			<Operators>
+
+			</Operators>
+		</Verb>
+		-->
+	</Verbs>
+
+	<Obligations>
+		<Obligation name="Pet Dog" verb="Pet">
+			<Conditions>
+			</Conditions>
+		</Obligation>
+		<Obligation name="Eat cookies" verb="Eat">
+			<Conditions>
+				<Condition 
+				name="Eat cookies since hungry" 
+				subject="?me" 
+				negate="false" 
+				attribute="Hungry"
+				/>				
+			</Conditions>
+		</Obligation>
+	</Obligations>
+	
+	<Goals>
+		<Goal name="Find Cookies">
+			<Operator 
+			name="Grab the cookies and have them" 
+			subject="?me" 
+			type="add"
+			relationship="Has" 
+			object="Cookie Jar"
+			/>
+		</Goal>
+	</Goals>
+
+	<Behaviors>
+		<Behavior
+		name="Room search"
+		verb="Walk"
+		/>
+		<Behavior
+		name="Wait"
+		verb="Wait"
+		/>
+	</Behaviors>
+	
+	<!-- Attribute Template
+	<Attribute name="..." />
+	-->
+	
+	<!-- Relationship Template
+	<Relationship name ="..." object="..." />
+	-->
+
+	<!-- Entity Template
+	<Entities>
+		<Entity name="...">
+			<Attributes>
+				<Attribute />
+				...
+			</Attributes>
+			<Relationships>
+				<Relationship />
+				...
+			</Relationships>	
+			<Obligations O="..." .../>
+			<Goals G="..." .../>	
+			<Behaviors B="..." .../>				
+		</Entity>
+	</Entities>
+	-->
+	
+	<!-- Condition Template
+	<Condition 
+	name="..." 
+	subject="..." 
+	negate="..." 
+	(attribute="..." 
+	|| (relationship="..." object="...")) 
+	/>
+	-->
+	
+	<!-- Operator Template
+	<Operator 
+	name="..." 
+	subject="..." 
+	type="..." (
+	attribute="..." 
+	|| (relationship="..." object="...") 
+	|| obligation="..." 
+	|| (goal="..." goalVariable="...")
+	|| (behavior="..." chance="...")) 
+	/>
+	-->
+	
+	<!-- End Condition Template 
+	<EndConditions>
+		<Condition />
+		<Condition />
+		<Condition />
+		...
+	</EndConditions>
+	-->
+	
+	<!-- Verb Template
+	<Verbs>
+		<Verb name="...">
+			<Variables>
+				<Variable name="?..." />
+				...
+			</Variables>
+			<Output>
+				<Out text="..." />
+				...
+			</Output>
+			<Conditions>
+				<Condition />
+				<Condition />
+				<Condition />
+				...
+			</Conditions>
+			<Operators>
+				<Operator />
+				<Operator />
+				<Operator />
+				...
+			</Operators>
+		</Verb>
+		...
+	</Verbs>
+	-->
+
+	<!-- Obligations Template
+	<Obligations>
+		<Obligation name="..." verb="...">
+			<Conditions>
+				<Condition />
+				<Condition />
+				<Condition />
+				...
+			</Conditions>
+		</Obligation>
+	</Obligations>
+	-->
+
+	<!-- Goals Template
+	<Goals>
+		<Goal name="...">
+			<Operator />
+		</Goal>
+	</Goals>
+	-->
+	
+	<!-- Behaviors Template
+	<Behaviors>
+		<Behavior
+		name="..."
+		verb="..."
+		/>
+		...
+	</Behaviors>
+	-->
+	
+</StoryWorld>
