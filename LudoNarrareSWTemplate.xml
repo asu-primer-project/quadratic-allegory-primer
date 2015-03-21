@@ -10,45 +10,74 @@
 	<!-- Relationship Template
 	<Relationship name="..." object="..." />
 	-->
-
-	<!-- Entity Template
-	<Entity name="...">
-		<Attribute name="..."/>
-		<Relationship name="..." object="..."/>
-		<Obligation verb="..." />
-		<Goal name="..." />
-		<Behavior verb="..." chance="..."/>		
-	</Entity>
-	-->
 	
 	<!-- Condition Template
-	<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
+	<Condition name="..." subject="..." negate="false" || "true">
+		<Attribute name="..." /> || <Relationship name="..." object="..." />
+	</Condition>
 	-->
 	
 	<!-- Operator Template
-	<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
+	<Operator name="..." subject="..." type="add" || "remove">
+		<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var="..." /> || <Behavior verb="..." chance="..." var="..." /> || For Goal definition see below
+	</Operator>
+	-->
+	
+	<!-- Obligation Template
+	<Obligation verb="..." var="..." />   <==== The number of "var='...'" statements matches the number of variables in the verb. Default value is ?rand.
+	-->
+
+	<!-- Goals Template
+	<Goal name="...">
+		<Operator name="..." subject="..." type="add" || "remove">
+			<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var="..." /> || <Behavior verb="..." chance="..." var="..." />
+		</Operator>
+	</Goal>
+	-->
+	
+	<!-- Behavior Template
+	<Behavior verb="..." chance="..." var="..." />   <==== The number of "var='...'" statements matches the number of variables in the verb. Default value is ?rand.
+	-->
+	
+	<!-- Story World Main Data Structures -->
+	<!-- Entity Template
+	<Entity name="...">
+		<Attribute name="..."/>
+		
+		<Relationship name="..." object="..."/>
+		
+		<Obligation verb="..." var="..." />
+		
+		For Goal definition see above
+		
+		<Behavior verb="..." chance="..." var="..." />	
+	</Entity>
 	-->
 	
 	<!-- End Condition Template 
 	<EndConditions>
-		<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
+		<Condition name="..." subject="..." negate="...">
+			<Attribute name="..." /> || <Relationship name="..." object="..." />
+		</Condition>
 	</EndConditions>
 	-->
 	
 	<!-- Verb Template
 	<Verb name="...">
 		<Variable name="?..." />
+		
 		<In text="..." />
+		
 		<Out text="..." />
-		<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
-		<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
+		
+		<Condition name="..." subject="..." negate="...">
+			<Attribute name="..." /> || <Relationship name="..." object="..." />
+		</Condition>
+		
+		<Operator name="..." subject="..." type="add" || "remove">
+			<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var="..." /> || <Behavior verb="..." chance="..." var="..." /> || For Goal Reference Below
+		</Operator>
 	</Verb>
-	-->
-
-	<!-- Goals Template
-	<Goal name="...">
-		<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
-	</Goal>
 	-->
 	
 </StoryWorld>
@@ -56,7 +85,7 @@
 <!-- Reserved Words 
 
 ?me - Built in variable which references the entity executing the verb.
+?rand - Built in variable which tells the AI that they can take a random path down the verb tree.
 Wait - Built in verb which allows entities to do nothing. Needed to handle cases where there are no available verbs for an entity.
-
 
 -->
