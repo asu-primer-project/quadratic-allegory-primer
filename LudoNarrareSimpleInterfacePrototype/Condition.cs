@@ -26,5 +26,30 @@ namespace LudoNarrareSimpleInterfacePrototype
             attribute = null;
             relationship = null;
         }
+
+        public void replaceWith(string replace, string with)
+        {
+            if (conditionSubject == replace)
+                conditionSubject = with;
+            if (relationship.other == replace)
+                relationship.other = with;
+        }
+
+        public void copyTo(Condition c)
+        {
+            if (c != null)
+            {
+                c.name = name;
+                c.conditionSubject = conditionSubject;
+                c.negate = negate;
+                c.type = type;
+                c.attribute = new Attribute("");
+                if (attribute != null)
+                    attribute.copyTo(c.attribute);
+                c.relationship = new Relationship("", "");
+                if (relationship != null)
+                    relationship.copyTo(c.relationship);
+            }
+        }
     }
 }

@@ -18,5 +18,14 @@ namespace LudoNarrareSimpleInterfacePrototype
             name = _name;
             other = _other;
         }
+
+        public void copyTo(Relationship r)
+        {
+            if (r != null)
+            {
+                r.name = name;
+                r.other = other;
+            }
+        }
     }
 }

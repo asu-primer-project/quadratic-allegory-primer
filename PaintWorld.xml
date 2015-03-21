@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!-- Story world for very basic testing of conditions and operators plus static verbs. Authored by J. M. Stark. -->
+<StoryWorld name="Paint World" userEntity="Jane">
+	
+	<!-- Entities -->
+	<Entity name="Jane">
+		<Attribute name="Red"/>	
+	</Entity>
+	
+	<Entity name="Jim">
+		<Attribute name="Blue"/>
+		
+		<Obligation verb="Pick Up Paintbrush" />
+		
+		<Behavior verb="Paint Red" chance="2"/>
+		<Behavior verb="Paint Yellow" chance="2"/>
+		<Behavior verb="Paint Blue" chance="2"/>
+		<Behavior verb="Put Down Paintbrush" chance="2" />
+		<Behavior verb="Wait" chance = "1"/>
+	</Entity>
+	
+	<Entity name="Paintbrush">
+	</Entity>
+	
+	<!-- Verbs -->
+	<Verb name="Paint Red">
+		<In text="Paint myself red." />
+
+		<Out text="?me" />
+		<Out text="paints their self red." />
+
+		<Condition name="Is not already red" subject="?me" negate="true" attribute="Red" />
+		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		
+		<Operator name="Change to red" subject="?me" type="add" attribute="Red" />
+		<Operator name="Remove yellow" subject="?me" type="remove" attribute="Yellow" />
+		<Operator name="Remove blue" subject="?me" type="remove" attribute="Blue" />
+	</Verb>
+
+	<Verb name="Paint Yellow">
+		<In text="Paint myself yellow." />
+
+		<Out text="?me" />
+		<Out text="paints their self yellow." />
+		
+		<Condition name="Is not already yellow" subject="?me" negate="true" attribute="Yellow" />
+		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		
+		<Operator name="Change to yellow" subject="?me" type="add" attribute="Yellow" />
+		<Operator name="Remove red" subject="?me" type="remove" attribute="Red" />
+		<Operator name="Remove blue" subject="?me" type="remove" attribute="Blue" />
+	</Verb>
+	
+	<Verb name="Paint Blue">
+		<In text="Paint myself blue." />
+
+		<Out text="?me" />
+		<Out text="paints their self blue." />
+
+		<Condition name="Is not already blue" subject="?me" negate="true" attribute="Blue" />
+		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		
+		<Operator name="Change to blue" subject="?me" type="add" attribute="Blue" />
+		<Operator name="Remove red" subject="?me" type="remove" attribute="Red" />
+		<Operator name="Remove yellow" subject="?me" type="remove" attribute="Yellow" />
+	</Verb>
+	
+	<Verb name="Pick Up Paintbrush">
+		<In text="Pick up the paintbrush." />
+		
+		<Out text="?me" />
+		<Out text="picked up the paintbrush." />
+		
+		<Condition name="Paintbrush is not already being held" subject="Paintbrush" negate="true" attribute="Held" />
+		
+		<Operator name="The paintbrush holder has brush" subject="?me" type="add" relationship="Holding" object="Paintbrush" />
+		<Operator name="The paintbrush is now in a held state" subject="Paintbrush" type="add" attribute="Held" />
+	</Verb>
+	
+	<Verb name="Put Down Paintbrush">
+		<In text="Put down the paintbrush." />
+		
+		<Out text="?me" />
+		<Out text="put down the paintbrush." />
+		
+		<Condition name="I am the one holding paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		
+		<Operator name="The paintbrush holder puts down brush" subject="?me" type="remove" relationship="Holding" object="Paintbrush" />
+		<Operator name="The paintbrush is not in a held state" subject="Paintbrush" type="remove" attribute="Held" />	
+	</Verb>
+	
+</StoryWorld>

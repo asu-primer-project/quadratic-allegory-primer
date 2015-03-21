@@ -18,5 +18,14 @@ namespace LudoNarrareSimpleInterfacePrototype
             name = _name;
             chance = _chance;
         }
+
+        public void copyTo(BehaviorReference br)
+        {
+            if (br != null)
+            {
+                br.name = name;
+                br.chance = chance;
+            }
+        }
     }
 }

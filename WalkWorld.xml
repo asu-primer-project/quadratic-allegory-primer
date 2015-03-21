@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<StoryWorld name="Walk World" userEntity="Robo12">
+	
+	<!-- Entities -->
+	<Entity name="Robo12">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room Front" />			
+	</Entity>
+	<!--
+	<Entity name="Robo44">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room Front" />
+
+		<Behavior name="Room Search" chance="1"/>
+		<Behavior name="Wait" chance="3"/>			
+	</Entity>
+	
+	<Entity name="Robo81">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room Back" />
+
+		<Behavior name="Room Search" chance="1"/>
+		<Behavior name="Wait" chance="3"/>			
+	</Entity>
+	
+	<Entity name="Robo39">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room Middle" />
+
+		<Behavior name="Room Search" chance="1"/>
+		<Behavior name="Wait" chance="3"/>				
+	</Entity>
+	-->
+	<Entity name="Room Front">
+		<Attribute name="Location"/>
+
+		<Relationship name ="Connected To" object="Room Middle" />
+	</Entity>
+	
+	<Entity name="Room Middle">
+		<Attribute name="Location"/>
+		
+		<Relationship name ="Connected To" object="Room Front" />
+		<Relationship name ="Connected To" object="Room Back" />		
+	</Entity>	
+	
+	<Entity name="Room Back">
+		<Attribute name="Location"/>
+
+		<Relationship name ="Connected To" object="Room Middle" />		
+	</Entity>		
+
+	<!-- Verbs -->
+	<Verb name="Walk">
+		<Variable name="?fromLocation" />
+		<Variable name="?toLocation" />
+
+		<In text="Walk to" />
+		<In text="?toLocation" />
+		<In text="from" />
+		<In text="?fromLocation" /> <!-- Weird deal here, there will only ever be one option available here, but it still gets a combobox; can't think of an easy distinction to call it out on -->
+		
+		<Out text="?me" />
+		<Out text="walks to" />
+		<Out text="?toLocation" />
+
+		<Condition name="From location is location" subject="?fromLocation" negate="false" attribute="Location" />
+		<Condition name="To location is location" subject="?toLocation" negate="false" attribute="Location" />
+		<Condition name="Me in from location" subject="?me" negate="false" relationship="At" object="?fromLocation" />
+		<Condition name="Path leading from location to location" subject="?fromLocation" negate="false" relationship="Connected To" object="?toLocation" />
+
+		<Operator name="Exit from location" subject="?me" type="remove" relationship="At" object="?fromLocation" />
+		<Operator name="Enter to location" subject="?me" type="add" relationship="At" object="?toLocation" />
+	</Verb>
+
+</StoryWorld>

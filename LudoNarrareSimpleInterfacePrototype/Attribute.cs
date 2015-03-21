@@ -16,5 +16,11 @@ namespace LudoNarrareSimpleInterfacePrototype
         {
             name = _name;
         }
+
+        public void copyTo(Attribute a)
+        {
+            if (a != null)
+                a.name = name;
+        }
     }
 }

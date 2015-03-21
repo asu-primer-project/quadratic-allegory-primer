@@ -14,7 +14,10 @@ namespace LudoNarrareSimpleInterfacePrototype
 {
     public partial class LNSimpleInterface : Form
     {
+        enum LoadState { loadFile, loadStoryWorld, loadEntity, loadEndCondition, loadVerb, loadGoal };
+
         private StoryWorld sw;
+        private Engine engine;
         private string swFileLoc;
         
         //Constructer/Setup
@@ -27,22 +30,16 @@ namespace LudoNarrareSimpleInterfacePrototype
         private void loadToolStripMenuItem_Click(object sender, EventArgs e)
         {
             DialogResult result = OpenWorldDataDialog.ShowDialog();
+            bool success = false;
             
             if (result == DialogResult.OK)
             {
                 swFileLoc = OpenWorldDataDialog.FileName;
                 XmlTextReader reader = new XmlTextReader(swFileLoc);
                 //Variables for tracking data added
-                int storyWorldLevel = 0;
-                int entityLevel = 0;
-                int endConditionLevel = 0;
-                int verbLevel = 0;
-                int obligationLevel = 0;
-                int goalLevel = 0;
-                int behaviorLevel = 0;
+                LoadState ls = LoadState.loadFile;
                 Entity currentEntity = null;
                 Verb currentVerb = null;
-                Obligation currentObligation = null;
                 Goal currentGoal = null;
                 
                 while (reader.Read())
@@ -51,9 +48,9 @@ namespace LudoNarrareSimpleInterfacePrototype
                     {
                         case XmlNodeType.Element:
                             //Read story world header data
-                            if (reader.Name == "StoryWorld")
+                            if (reader.Name == "StoryWorld" && ls == LoadState.loadFile)
                             {
-                                storyWorldLevel = 1;
+                                ls = LoadState.loadStoryWorld;
                                 sw = new StoryWorld("StoryWorld", "UserEntity");
 
                                 while (reader.MoveToNextAttribute())
@@ -66,12 +63,9 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
                             
                             //Read entity data
-                            if (reader.Name == "Entities" && storyWorldLevel == 1)
-                                entityLevel = 1;
-
-                            if (reader.Name == "Entity" && entityLevel == 1)
+                            if (reader.Name == "Entity" && ls == LoadState.loadStoryWorld)
                             {
-                                entityLevel = 2;
+                                ls = LoadState.loadEntity;
                                 currentEntity = new Entity("Entity");
                                 sw.entities.Add(currentEntity);
 
@@ -82,22 +76,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 }
                             }
 
-                            if (reader.Name == "Attributes" && entityLevel == 2)
-                                entityLevel = 3;
-
-                            if (reader.Name == "Relationships" && entityLevel == 2)
-                                entityLevel = 3;
-
-                            if (reader.Name == "Obligations" && entityLevel == 2)
-                                entityLevel = 3;
-
-                            if (reader.Name == "Goals" && entityLevel == 2)
-                                entityLevel = 3;
-
-                            if (reader.Name == "Behaviors" && entityLevel == 2)
-                                entityLevel = 3;
-
-                            if (reader.Name == "Attribute" && entityLevel == 3)
+                            if (reader.Name == "Attribute" && ls == LoadState.loadEntity)
                             {
                                 Attribute temp = new Attribute("Attribute");
                                 
@@ -110,7 +89,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentEntity.attributes.Add(temp);
                             }
 
-                            if (reader.Name == "Relationship" && entityLevel == 3)
+                            if (reader.Name == "Relationship" && ls == LoadState.loadEntity)
                             {
                                 Relationship temp = new Relationship("Relationship","Other");
 
@@ -125,20 +104,20 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentEntity.relationships.Add(temp);
                             }
 
-                            if (reader.Name == "Obligation" && entityLevel == 3)
+                            if (reader.Name == "Obligation" && ls == LoadState.loadEntity)
                             {
                                 string temp = "Obligation";
 
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "name")
+                                    if (reader.Name == "verb")
                                         temp = reader.Value;
                                 }
 
                                 currentEntity.obligations.Add(temp);
                             }
 
-                            if (reader.Name == "Goal" && entityLevel == 3)
+                            if (reader.Name == "Goal" && ls == LoadState.loadEntity)
                             {
                                 string temp = "Goal";
 
@@ -151,13 +130,13 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentEntity.goals.Add(temp);
                             }
 
-                            if (reader.Name == "Behavior" && entityLevel == 3)
+                            if (reader.Name == "Behavior" && ls == LoadState.loadEntity)
                             {
                                 BehaviorReference temp = new BehaviorReference("Behavior", 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "name")
+                                    if (reader.Name == "verb")
                                         temp.name = reader.Value;
                                     if (reader.Name == "chance")
                                     {
@@ -170,10 +149,10 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
                             
                             //Read end condition data
-                            if (reader.Name == "EndConditions" && storyWorldLevel == 1)
-                                endConditionLevel = 1;
+                            if (reader.Name == "EndConditions" && ls == LoadState.loadStoryWorld)
+                                ls = LoadState.loadEndCondition;
 
-                            if (reader.Name == "Condition" && endConditionLevel == 1)
+                            if (reader.Name == "Condition" && ls == LoadState.loadEndCondition)
                             {
                                 Condition temp = new Condition("Condition", "Subject", false, 0);
 
@@ -208,50 +187,47 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
 
                             //Read verb data
-                            if (reader.Name == "Verbs" && storyWorldLevel == 1)
-                                verbLevel = 1;
-
-                            if (reader.Name == "Verb" && verbLevel == 1)
+                            if (reader.Name == "Verb" && ls == LoadState.loadStoryWorld)
                             {
-                                verbLevel = 2;
+                                ls = LoadState.loadVerb;
                                 currentVerb = new Verb("Verb");
-                                sw.verbs.Add(currentVerb);
+                                sw.verbs.Insert(0, currentVerb);
 
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "name")
+                                    if (reader.Name == "name" && reader.Value != "Wait")
                                         currentVerb.name = reader.Value;
                                 }
                             }
 
-                            if (reader.Name == "Variables" && verbLevel == 2)
-                                verbLevel = 3;
-
-                            if (reader.Name == "Variable" && verbLevel == 3)
+                            if (reader.Name == "Variable" && ls == LoadState.loadVerb)
                             {
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "name")
+                                    if (reader.Name == "name" && reader.Value != "?me")
                                         currentVerb.variables.Add(reader.Value);
                                 }
                             }
 
-                            if (reader.Name == "Output" && verbLevel == 2)
-                                verbLevel = 3;
-
-                            if (reader.Name == "Out" && verbLevel == 3)
+                            if (reader.Name == "In" && ls == LoadState.loadVerb)
                             {
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "name")
+                                    if (reader.Name == "text")
+                                        currentVerb.input.Add(reader.Value);
+                                }
+                            }
+
+                            if (reader.Name == "Out" && ls == LoadState.loadVerb)
+                            {
+                                while (reader.MoveToNextAttribute())
+                                {
+                                    if (reader.Name == "text")
                                         currentVerb.output.Add(reader.Value);
                                 }
                             }
 
-                            if (reader.Name == "Conditions" && verbLevel == 2)
-                                verbLevel = 3;
-
-                            if (reader.Name == "Condition" && verbLevel == 3)
+                            if (reader.Name == "Condition" && ls == LoadState.loadVerb)
                             {
                                 Condition temp = new Condition("Condition", "Subject", false, 0);
 
@@ -285,10 +261,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentVerb.conditions.Add(temp);
                             }
 
-                            if (reader.Name == "Operators" && verbLevel == 2)
-                                verbLevel = 3;
-
-                            if (reader.Name == "Operator" && verbLevel == 3)
+                            if (reader.Name == "Operator" && ls == LoadState.loadVerb)
                             {
                                 Operator temp = new Operator("Operator", "Subject", true, 0, "Obligation", "Goal", "?Var");
 
@@ -300,7 +273,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         temp.operatorSubject = reader.Value;
                                     if (reader.Name == "type")
                                     {
-                                        if (reader.Value == "Remove")
+                                        if (reader.Value == "remove")
                                             temp.addRemove = false;
                                         else
                                             temp.addRemove = true;
@@ -344,69 +317,10 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentVerb.operators.Add(temp);
                             }
 
-                            //Read obligation data
-                            if (reader.Name == "Obligations" && storyWorldLevel == 1)
-                                obligationLevel = 1;
-
-                            if (reader.Name == "Obligation" && obligationLevel == 1)
-                            {
-                                obligationLevel = 2;
-                                currentObligation = new Obligation("Obligation", "Verb");
-                                sw.obligations.Add(currentObligation);
-
-                                while (reader.MoveToNextAttribute())
-                                {
-                                    if (reader.Name == "name")
-                                        currentObligation.name = reader.Value;
-                                    if (reader.Name == "verb")
-                                        currentObligation.verb = reader.Value;
-                                }
-                            }
-
-                            if (reader.Name == "Conditions" && obligationLevel == 2)
-                                obligationLevel = 3;
-
-                            if (reader.Name == "Condition" && obligationLevel == 3)
-                            {
-                                Condition temp = new Condition("Condition", "Subject", false, 0);
-
-                                while (reader.MoveToNextAttribute())
-                                {
-                                    if (reader.Name == "name")
-                                        temp.name = reader.Value;
-                                    if (reader.Name == "subject")
-                                        temp.conditionSubject = reader.Value;
-                                    if (reader.Name == "negate")
-                                    {
-                                        if (reader.Value == "true")
-                                            temp.negate = true;
-                                        else
-                                            temp.negate = false;
-                                    }
-                                    if (reader.Name == "attribute")
-                                    {
-                                        temp.type = 0;
-                                        temp.attribute = new Attribute(reader.Value);
-                                    }
-                                    else if (reader.Name == "relationship")
-                                    {
-                                        temp.type = 1;
-                                        temp.relationship = new Relationship(reader.Value, "Object");
-                                    }
-                                    if (reader.Name == "object" && temp.type == 1)
-                                        temp.relationship.other = reader.Value;
-                                }
-
-                                currentObligation.conditions.Add(temp);
-                            }
-
                             //Read goal data
-                            if (reader.Name == "Goals" && storyWorldLevel == 1)
-                                goalLevel = 1;
-
-                            if (reader.Name == "Goal" && goalLevel == 1)
+                            if (reader.Name == "Goal" && ls == LoadState.loadStoryWorld)
                             {
-                                goalLevel = 2;
+                                ls = LoadState.loadGoal;
                                 currentGoal = new Goal("Goal");
                                 sw.goals.Add(currentGoal);
 
@@ -417,7 +331,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 }
                             }
 
-                            if (reader.Name == "Operator" && goalLevel == 2)
+                            if (reader.Name == "Operator" && ls == LoadState.loadGoal)
                             {
                                 Operator temp = new Operator("Operator", "Subject", true, 0, "Obligation", "Goal", "?Var");
 
@@ -429,7 +343,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         temp.operatorSubject = reader.Value;
                                     if (reader.Name == "type")
                                     {
-                                        if (reader.Value == "Remove")
+                                        if (reader.Value == "remove")
                                             temp.addRemove = false;
                                         else
                                             temp.addRemove = true;
@@ -473,92 +387,68 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 currentGoal.goalOperator = temp;
                             }
 
-                            //Read behavior data
-                            if (reader.Name == "Behaviors" && storyWorldLevel == 1)
-                                behaviorLevel = 1;
-
-                            if (reader.Name == "Behavior" && behaviorLevel == 1)
-                            {
-                                Behavior temp = new Behavior("Behavior", "Verb");
-
-                                while (reader.MoveToNextAttribute())
-                                {
-                                    if (reader.Name == "name")
-                                        temp.name = reader.Value;
-                                    if (reader.Name == "verb")
-                                        temp.verb = reader.Value;
-                                }
-
-                                sw.behaviors.Add(temp);
-                            }
-
                             break;
                         case XmlNodeType.EndElement:
                             //Back out of story world data
-                            if (reader.Name == "StoryWorld" && storyWorldLevel == 1)
-                                storyWorldLevel = 0;
+                            if (reader.Name == "StoryWorld" && ls == LoadState.loadStoryWorld)
+                                ls = LoadState.loadFile;
                             
                             //Back out of entity data
-                            if (reader.Name == "Entities" && entityLevel == 1)
-                                entityLevel = 0;
-                            if (reader.Name == "Entity" && entityLevel == 2)
-                                entityLevel = 1;
-                            if (reader.Name == "Attributes" && entityLevel == 3)
-                                entityLevel = 2;
-                            if (reader.Name == "Relationships" && entityLevel == 3)
-                                entityLevel = 2;
-                            if (reader.Name == "Obligations" && entityLevel == 3)
-                                entityLevel = 2;
-                            if (reader.Name == "Goals" && entityLevel == 3)
-                                entityLevel = 2;
-                            if (reader.Name == "Behaviors" && entityLevel == 3)
-                                entityLevel = 2;
+                            if (reader.Name == "Entity" && ls == LoadState.loadEntity)
+                                ls = LoadState.loadStoryWorld;
 
                             //Back out of end conditions
-                            if (reader.Name == "EndConditions" && endConditionLevel == 1)
-                                endConditionLevel = 0;
+                            if (reader.Name == "EndConditions" && ls == LoadState.loadEndCondition)
+                                ls = LoadState.loadStoryWorld;
 
                             //Back out of verbs
-                            if (reader.Name == "Verbs" && verbLevel == 1)
-                                verbLevel = 0;
-                            if (reader.Name == "Verb" && verbLevel == 2)
-                                verbLevel = 1;
-                            if (reader.Name == "Variables" && verbLevel == 3)
-                                verbLevel = 2;
-                            if (reader.Name == "Output" && verbLevel == 3)
-                                verbLevel = 2;
-                            if (reader.Name == "Conditions" && verbLevel == 3)
-                                verbLevel = 2;
-                            if (reader.Name == "Operators" && verbLevel == 3)
-                                verbLevel = 2;
-
-                            //Back out of obligation data
-                            if (reader.Name == "Obligations" && obligationLevel == 1)
-                                obligationLevel = 0;
-                            if (reader.Name == "Obligation" && obligationLevel == 2)
-                                obligationLevel = 1;
-                            if (reader.Name == "Conditions" && obligationLevel == 3)
-                                obligationLevel = 2;
+                            if (reader.Name == "Verb" && ls == LoadState.loadVerb)
+                                ls = LoadState.loadStoryWorld;
 
                             //Back out of goal data
-                            if (reader.Name == "Goals" && goalLevel == 1)
-                                goalLevel = 0;
-                            if (reader.Name == "Goal" && goalLevel == 2)
-                                goalLevel = 1;
-
-                            //Back out of behavior data
-                            if (reader.Name == "Behaviors" && behaviorLevel == 1)
-                                behaviorLevel = 0;
+                            if (reader.Name == "Goal" && ls == LoadState.loadGoal)
+                                ls = LoadState.loadStoryWorld;
 
                             break;
                     }
                 }
-                    
-                //MessageBox.Show("Story World data missing. Could not load", "Error", MessageBoxButtons.OK);
+
+                success = (ls == LoadState.loadFile) ? true : false;                 
             }
 
+            //Initiate the engine with the loaded story world data.
+            if (sw != null && success)
+            {
+                WorldDataOutBox.Text = sw.getPrintedWorldState();
+                engine = new Engine(sw);
+                engine.init();
+                comboBoxVerb.DataSource = engine.currentUserChoices;
+            }
+            else
+                MessageBox.Show("Story World data could not be loaded correctly.", "Error", MessageBoxButtons.OK);
+        }
+
+        //Update output boxes on tab change
+        private void Tabs_SelectedIndexChanged(object sender, EventArgs e)
+        {
             if (sw != null)
                 WorldDataOutBox.Text = sw.getPrintedWorldState();
+            if (engine != null)
+                OutputBox.Text = engine.output;
+        }
+
+        //Process verb chosen and then update output boxes
+        private void buttonInput_Click(object sender, EventArgs e)
+        {
+            //Process verb
+            engine.takeInputAndProcess(engine.currentUserChoices[comboBoxVerb.SelectedIndex]);
+            comboBoxVerb.DataSource = engine.currentUserChoices;
+
+            //Update output
+            if (sw != null)
+                WorldDataOutBox.Text = sw.getPrintedWorldState();
+            if (engine != null)
+                OutputBox.Text = engine.output;
         }
 
         //Exit program

@@ -14,9 +14,7 @@ namespace LudoNarrareSimpleInterfacePrototype
         public List<Entity> entities;
         public List<Condition> endConditions;
         public List<Verb> verbs;
-        public List<Obligation> obligations;
         public List<Goal> goals;
-        public List<Behavior> behaviors;
 
         /* Functions */
         public StoryWorld(string _name, string _userEntity)
@@ -26,9 +24,12 @@ namespace LudoNarrareSimpleInterfacePrototype
             entities = new List<Entity>();
             endConditions = new List<Condition>();
             verbs = new List<Verb>();
-            obligations = new List<Obligation>();
+
+            Verb vTemp = new Verb("Wait");
+            vTemp.input.Add("Wait.");
+            verbs.Add(vTemp);
+
             goals = new List<Goal>();
-            behaviors = new List<Behavior>();
         }
 
         public string getPrintedWorldState()
@@ -37,11 +38,11 @@ namespace LudoNarrareSimpleInterfacePrototype
             temp = "Story World: " + name + "\n";
             temp += "{\n";
 
-            temp += ("\tUser Entity: " + userEntity + "\n\n");
+            temp += ("\tUser Entity: " + userEntity + "\n");
 
             if (entities.Count > 0)
             {
-                temp += "\t--Entities--\n\n";
+                temp += "\n\t--Entities--\n";
                 for (int i = 0; i < entities.Count; i++)
                 {
                     temp += ("\t" + entities[i].name + "\n");
@@ -49,64 +50,45 @@ namespace LudoNarrareSimpleInterfacePrototype
                     
                     if (entities[i].attributes.Count > 0)
                     {
-                        temp += "\t\t--Attributes--\n";
                         for (int j = 0; j < entities[i].attributes.Count; j++)
-                        {
-                            temp += ("\t\t" + entities[i].attributes[j].name + "\n");
-                        }
-                        temp += "\n";
+                            temp += ("\t\tAttribute: " + entities[i].attributes[j].name + "\n");
                     }
 
                     if (entities[i].relationships.Count > 0)
                     {
-                        temp += "\t\t--Relationships--\n";
                         for (int j = 0; j < entities[i].relationships.Count; j++)
-                        {
-                            temp += ("\t\t" + entities[i].relationships[j].name + " | Object: " + entities[i].relationships[j].other + "\n");
-                        }
-                        temp += "\n";
+                            temp += ("\t\tRelationship: " + entities[i].relationships[j].name + " | Object: " + entities[i].relationships[j].other + "\n");
                     }
 
                     if (entities[i].obligations.Count > 0)
                     {
-                        temp += "\t\t--Obligations--\n";
                         for (int j = 0; j < entities[i].obligations.Count; j++)
-                        {
-                            temp += ("\t\t" + entities[i].obligations[j] + "\n");
-                        }
-                        temp += "\n";
+                            temp += ("\t\tObligation: " + entities[i].obligations[j] + "\n");
                     }
 
                     if (entities[i].goals.Count > 0)
                     {
-                        temp += "\t\t--Goals--\n";
                         for (int j = 0; j < entities[i].goals.Count; j++)
-                        {
-                            temp += ("\t\t" + entities[i].goals[j] + "\n");
-                        }
-                        temp += "\n";
+                            temp += ("\t\tGoal: " + entities[i].goals[j] + "\n");
                     }
 
                     if (entities[i].behaviors.Count > 0)
                     {
-                        temp += "\t\t--Behaviors--\n";
                         for (int j = 0; j < entities[i].behaviors.Count; j++)
-                        {
-                            temp += ("\t\t" + entities[i].behaviors[j].name + " | Chance: " + entities[i].behaviors[j].chance + "\n");
-                        }
+                            temp += ("\t\tBehavior: " + entities[i].behaviors[j].name + " | Chance: " + entities[i].behaviors[j].chance + "\n");
                     }
 
-                    temp += "\t}\n\n";
+                    temp += "\t}\n";
                 }           
             }
 
             if (endConditions.Count > 0)
             {
-                temp += "\t--End Conditions--\n\n";
+                temp += "\n\t--End Conditions--\n";
                 for (int i = 0; i < endConditions.Count; i++)
                 {
-                    temp += ("\t" + endConditions[i].name + "\n");
-                    temp += ("\t(Subject: " + endConditions[i].conditionSubject);
+                    temp += ("\tCondition: " + endConditions[i].name + " -> ");
+                    temp += ("(Subject: " + endConditions[i].conditionSubject);
                     if (endConditions[i].negate)
                         temp += (" | Negate: True ");
                     else
@@ -121,7 +103,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 
             if (verbs.Count > 0)
             {
-                temp += "\n\t--Verbs--\n\n";
+                temp += "\n\t--Verbs--\n";
                 for (int i = 0; i < verbs.Count; i++)
                 {
                     temp += ("\t" + verbs[i].name + "\n");
@@ -129,31 +111,32 @@ namespace LudoNarrareSimpleInterfacePrototype
                     
                     if (verbs[i].variables.Count > 0)
                     {
-                        temp += "\t\t--Variables--\n";
                         for (int j = 0; j < verbs[i].variables.Count; j++)
-                        {
-                            temp += ("\t\t" + verbs[i].variables[j] + "\n");
-                        }
+                            temp += ("\t\tVariable: " + verbs[i].variables[j] + "\n");
+                    }
+
+                    if (verbs[i].input.Count > 0)
+                    {
+                        temp += "\t\tInput: ";
+                        for (int j = 0; j < verbs[i].input.Count; j++)
+                            temp += (verbs[i].input[j] + " ");
                         temp += "\n";
                     }
 
                     if (verbs[i].output.Count > 0)
                     {
-                        temp += "\t\t--Output--\n\t\t";
+                        temp += "\t\tOutput: ";
                         for (int j = 0; j < verbs[i].output.Count; j++)
-                        {
                             temp += (verbs[i].output[j] + " ");
-                        }
-                        temp += "\n\n";
+                        temp += "\n";
                     }
 
                     if (verbs[i].conditions.Count > 0)
                     {
-                        temp += "\t\t--Conditions--\n";
                         for (int j = 0; j < verbs[i].conditions.Count; j++)
                         {
-                            temp += ("\t\t" + verbs[i].conditions[j].name + "\n");
-                            temp += ("\t\t(Subject: " + verbs[i].conditions[j].conditionSubject);
+                            temp += ("\t\tCondition: " + verbs[i].conditions[j].name + " -> ");
+                            temp += ("(Subject: " + verbs[i].conditions[j].conditionSubject);
                             if (verbs[i].conditions[j].negate)
                                 temp += (" | Negate: True ");
                             else
@@ -164,16 +147,14 @@ namespace LudoNarrareSimpleInterfacePrototype
                             else if (verbs[i].conditions[j].type == 1)
                                 temp += ("| Relationship: " + verbs[i].conditions[j].relationship.name + " | Object: " + verbs[i].conditions[j].relationship.other + ")\n");
                         }
-                        temp += "\n";
                     }
 
                     if (verbs[i].operators.Count > 0)
                     {
-                        temp += "\t\t--Operators--\n";
                         for (int j = 0; j < verbs[i].operators.Count; j++)
                         {
-                            temp += ("\t\t" + verbs[i].operators[j].name + "\n");
-                            temp += ("\t\t(Subject: " + verbs[i].operators[j].operatorSubject);
+                            temp += ("\t\tOperator: " + verbs[i].operators[j].name + " -> ");
+                            temp += ("(Subject: " + verbs[i].operators[j].operatorSubject);
                             if (verbs[i].operators[j].addRemove)
                                 temp += (" | Type: Add ");
                             else
@@ -192,50 +173,17 @@ namespace LudoNarrareSimpleInterfacePrototype
                         }
                     }
 
-                    temp += "\t}\n\n";
-                }
-            }
-
-            if (obligations.Count > 0)
-            {
-                temp += "\t--Obligations--\n\n";
-                for (int i = 0; i < obligations.Count; i++)
-                {
-                    temp += ("\t" + obligations[i].name + "\n");
-                    temp += "\t{\n";
-                    temp += ("\t\t Verb:" + obligations[i].verb + "\n");
-                    if (obligations[i].conditions.Count > 0)
-                    {
-                        temp += "\n\t\t--Conditions--\n";
-                        for (int j = 0; j < obligations[i].conditions.Count; j++)
-                        {
-                            temp += ("\t\t" + obligations[i].conditions[j].name + "\n");
-                            temp += ("\t\t(Subject: " + obligations[i].conditions[j].conditionSubject);
-                            if (obligations[i].conditions[j].negate)
-                                temp += (" | Negate: True ");
-                            else
-                                temp += (" | Negate: False ");
-
-                            if (obligations[i].conditions[j].type == 0)
-                                temp += ("| Attribute: " + obligations[i].conditions[j].attribute.name + ")\n");
-                            else if (obligations[i].conditions[j].type == 1)
-                                temp += ("| Relationship: " + obligations[i].conditions[j].relationship.name + " | Object: " + obligations[i].conditions[j].relationship.other + ")\n");
-                        }
-                    }
-
-                    temp += "\t}\n\n";
+                    temp += "\t}\n";
                 }
             }
 
             if (goals.Count > 0)
             {
-                temp += "\t--Goals--\n\n";
                 for (int i = 0; i < goals.Count; i++)
                 {
-                    temp += ("\t" + goals[i].name + "\n");
-                    temp += ("\t--Goal Operator--\n");
-                    temp += ("\t" + goals[i].goalOperator.name + "\n");
-                    temp += ("\t(Subject: " + goals[i].goalOperator.operatorSubject);
+                    temp += ("\tGoal: " + goals[i].name + "\n");
+                    temp += ("\tOperator: " + goals[i].goalOperator.name + " -> ");
+                    temp += ("(Subject: " + goals[i].goalOperator.operatorSubject);
                     if (goals[i].goalOperator.addRemove)
                         temp += (" | Type: Add ");
                     else
@@ -254,22 +202,8 @@ namespace LudoNarrareSimpleInterfacePrototype
                 }
             }
 
-            if (behaviors.Count > 0)
-            {
-                temp += "\n\t--Behaviors--\n\n";
-                for (int i = 0; i < behaviors.Count; i++)
-                {
-                    temp += ("\t" + behaviors[i].name + " | Verb: " + behaviors[i].verb + "\n");
-                }
-            }
-
-            temp += "}\n";
+            temp += "}";
             return temp;
-        }
-
-        public override string ToString()
-        {
-            return name;
         }
     }
 }

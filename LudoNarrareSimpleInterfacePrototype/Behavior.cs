@@ -8,6 +8,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 {
     class Behavior
     {
+        /*UNUSED CLASS ATM*/
         /* Variables */
         public string name;
         public string verb;

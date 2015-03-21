@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- Template for LudoNarrare story world definition file -->
-<Storyworld name="..." userEntity="...">
+<StoryWorld name="..." userEntity="...">
 	
 	<!-- Story World Attributes -->
 	<!-- Attribute Template
@@ -8,126 +8,55 @@
 	-->
 	
 	<!-- Relationship Template
-	<Relationship name ="..." object="..." />
+	<Relationship name="..." object="..." />
 	-->
 
 	<!-- Entity Template
-	<Entities>
-		<Entity name="...">
-			<Attributes>
-				<Attribute />
-				...
-			</Attributes>
-			<Relationships>
-				<Relationship />
-				...
-			</Relationships>	
-			<Obligations name="..." />
-				<Obligation name="..." />
-				...
-			</Obligations?
-			<Goals name="..." />	
-				<Goal name="..." />
-				...
-			</Goals>
-			<Behaviors>
-				<Behavior name="..." chance="..."/>
-				...
-			</Behaviors>				
-		</Entity>
-	</Entities>
+	<Entity name="...">
+		<Attribute name="..."/>
+		<Relationship name="..." object="..."/>
+		<Obligation verb="..." />
+		<Goal name="..." />
+		<Behavior verb="..." chance="..."/>		
+	</Entity>
 	-->
 	
 	<!-- Condition Template
-	<Condition 
-	name="..." 
-	subject="..." 
-	negate="..." 
-	(attribute="..." 
-	|| (relationship="..." object="...")) 
-	/>
+	<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
 	-->
 	
 	<!-- Operator Template
-	<Operator 
-	name="..." 
-	subject="..." 
-	type="..." (
-	attribute="..." 
-	|| (relationship="..." object="...") 
-	|| obligation="..." 
-	|| (goal="..." goalVariable="...")
-	|| (behavior="..." chance="...")) 
-	/>
+	<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
 	-->
 	
 	<!-- End Condition Template 
 	<EndConditions>
-		<Condition />
-		<Condition />
-		<Condition />
-		...
+		<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
 	</EndConditions>
 	-->
 	
 	<!-- Verb Template
-	<Verbs>
-		<Verb name="...">
-			<Variables>
-				<Variable name="?..." />
-				...
-			</Variables>
-			<Output>
-				<Out text="..." />
-				...
-			</Output>
-			<Conditions>
-				<Condition />
-				<Condition />
-				<Condition />
-				...
-			</Conditions>
-			<Operators>
-				<Operator />
-				<Operator />
-				<Operator />
-				...
-			</Operators>
-		</Verb>
-		...
-	</Verbs>
-	-->
-
-	<!-- Obligations Template
-	<Obligations>
-		<Obligation name="..." verb="...">
-			<Conditions>
-				<Condition />
-				<Condition />
-				<Condition />
-				...
-			</Conditions>
-		</Obligation>
-	</Obligations>
+	<Verb name="...">
+		<Variable name="?..." />
+		<In text="..." />
+		<Out text="..." />
+		<Condition name="..." subject="..." negate="..." attribute="..." relationship="..." object="..." />
+		<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
+	</Verb>
 	-->
 
 	<!-- Goals Template
-	<Goals>
-		<Goal name="...">
-			<Operator />
-		</Goal>
-	</Goals>
+	<Goal name="...">
+		<Operator name="..." subject="..." type="..." attribute="..." relationship="..." object="..." obligation="..."goal="..." goalVariable="..." behavior="..." chance="..." />
+	</Goal>
 	-->
 	
-	<!-- Behaviors Template
-	<Behaviors>
-		<Behavior
-		name="..."
-		verb="..."
-		chance="..."
-		/>
-		...
-	</Behaviors>
-	-->
-	
-</Storyworld>
+</StoryWorld>
+
+<!-- Reserved Words 
+
+?me - Built in variable which references the entity executing the verb.
+Wait - Built in verb which allows entities to do nothing. Needed to handle cases where there are no available verbs for an entity.
+
+
+-->

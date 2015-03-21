@@ -48,6 +48,8 @@
     <Compile Include="Behavior.cs" />
     <Compile Include="BehaviorReference.cs" />
     <Compile Include="Condition.cs" />
+    <Compile Include="DynamicVerbTreeNode.cs" />
+    <Compile Include="Engine.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="Goal.cs" />
     <Compile Include="LNSimpleInterface.cs">

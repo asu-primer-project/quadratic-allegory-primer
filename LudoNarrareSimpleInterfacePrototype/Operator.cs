@@ -34,5 +34,36 @@ namespace LudoNarrareSimpleInterfacePrototype
             goalVariable = _goalVariable;
             behavior = null;
         }
+
+        public void replaceWith(string replace, string with)
+        {
+            if (operatorSubject == replace)
+                operatorSubject = with;
+            if (relationship.other == replace)
+                relationship.other = with;
+        }
+
+        public void copyTo(Operator op)
+        {
+            if (op != null)
+            {
+                op.name = name;
+                op.operatorSubject = operatorSubject;
+                op.addRemove = addRemove;
+                op.type = type;
+                op.attribute = new Attribute("");
+                if (attribute != null)
+                    attribute.copyTo(op.attribute);
+                op.relationship = new Relationship("", "");
+                if (relationship != null)
+                    relationship.copyTo(op.relationship);
+                op.obligation = obligation;
+                op.goal = goal;
+                op.goalVariable = goalVariable;
+                op.behavior = new BehaviorReference("", 0);
+                if (behavior != null)
+                    behavior.copyTo(op.behavior);
+            }
+        }
     }
 }
