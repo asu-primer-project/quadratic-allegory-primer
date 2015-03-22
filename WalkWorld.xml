@@ -64,13 +64,25 @@
 		<Out text="walks to" />
 		<Out text="?toLocation" />
 
-		<Condition name="From location is location" subject="?fromLocation" negate="false" attribute="Location" />
-		<Condition name="To location is location" subject="?toLocation" negate="false" attribute="Location" />
-		<Condition name="Me in from location" subject="?me" negate="false" relationship="At" object="?fromLocation" />
-		<Condition name="Path leading from location to location" subject="?fromLocation" negate="false" relationship="Connected To" object="?toLocation" />
-
-		<Operator name="Exit from location" subject="?me" type="remove" relationship="At" object="?fromLocation" />
-		<Operator name="Enter to location" subject="?me" type="add" relationship="At" object="?toLocation" />
+		<Condition name="From location is location" subject="?fromLocation" negate="false">
+			<Attribute name="Location" />
+		</Condition>
+		<Condition name="To location is location" subject="?toLocation" negate="false">
+			<Attribute name="Location" />
+		</Condition>
+		<Condition name="Me in from location" subject="?me" negate="false">
+			<Relationship name="At" object="?fromLocation" />
+		</Condition>
+		<Condition name="Path leading from location to location" subject="?fromLocation" negate="false">
+			<Relationship name="Connected To" object="?toLocation" />
+		</Condition>
+		
+		<Operator name="Exit from location" subject="?me" type="remove">
+			<Relationship name="At" object="?fromLocation" />
+		</Operator>
+		<Operator name="Enter to location" subject="?me" type="add">
+			<Relationship name="At" object="?toLocation" />
+		</Operator>
 	</Verb>
 
 </StoryWorld>

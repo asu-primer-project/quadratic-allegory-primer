@@ -79,7 +79,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                 verb.operators.Clear();
                 for (int i = 0; i < operators.Count; i++)
                 {
-                    Operator temp = new Operator("", "", false, 0, "", "", "");
+                    Operator temp = new Operator("", "", false, 0);
                     operators[i].copyTo(temp);
                     verb.operators.Add(temp);
                 }

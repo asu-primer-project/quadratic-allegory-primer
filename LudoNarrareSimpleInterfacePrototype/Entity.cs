@@ -12,9 +12,9 @@ namespace LudoNarrareSimpleInterfacePrototype
         public string name;
         public List<Attribute> attributes;
         public List<Relationship> relationships;
-        public List<string> obligations;
-        public List<string> goals;
-        public List<BehaviorReference> behaviors;
+        public List<Obligation> obligations;
+        public List<Goal> goals;
+        public List<Behavior> behaviors;
 
         /* Functions */
         public Entity(string _name)
@@ -22,9 +22,9 @@ namespace LudoNarrareSimpleInterfacePrototype
             name = _name;
             attributes = new List<Attribute>();
             relationships = new List<Relationship>();
-            obligations = new List<string>();
-            goals = new List<string>();
-            behaviors = new List<BehaviorReference>();
+            obligations = new List<Obligation>();
+            goals = new List<Goal>();
+            behaviors = new List<Behavior>();
         }
     }
 }

@@ -8,6 +8,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 {
     class BehaviorReference
     {
+        /* UNUSED CLASS */
         /* Variables */
         public string name;
         public int chance;

@@ -15,13 +15,12 @@ namespace LudoNarrareSimpleInterfacePrototype
         public int type; // Attribute - 0, Relationship - 1, Obligation - 2, Goal - 3, Behavior - 4
         public Attribute attribute;
         public Relationship relationship;
-        public string obligation;
-        public string goal;
-        public string goalVariable;
-        public BehaviorReference behavior;
+        public Obligation obligation;
+        public Goal goal;
+        public Behavior behavior;
 
         /* Functions */
-        public Operator(string _name, string _operatorSubject, bool _addRemove, int _type, string _obligation, string _goal, string _goalVariable)
+        public Operator(string _name, string _operatorSubject, bool _addRemove, int _type)
         {
             name = _name;
             operatorSubject = _operatorSubject;
@@ -29,9 +28,8 @@ namespace LudoNarrareSimpleInterfacePrototype
             type = _type;
             attribute = null;
             relationship = null;
-            obligation = _obligation;
-            goal = _goal;
-            goalVariable = _goalVariable;
+            obligation = null;
+            goal = null;
             behavior = null;
         }
 
@@ -41,6 +39,22 @@ namespace LudoNarrareSimpleInterfacePrototype
                 operatorSubject = with;
             if (relationship.other == replace)
                 relationship.other = with;
+            if (obligation != null)
+            {
+                for (int i = 0; i < obligation.arguments.Count; i++ )
+                {
+                    if (obligation.arguments[i] == replace)
+                        obligation.arguments[i] = with;
+                }
+            }
+            if (behavior != null)
+            {
+                for (int i = 0; i < obligation.arguments.Count; i++)
+                {
+                    if (obligation.arguments[i] == replace)
+                        obligation.arguments[i] = with;
+                }
+            }           
         }
 
         public void copyTo(Operator op)
@@ -57,10 +71,13 @@ namespace LudoNarrareSimpleInterfacePrototype
                 op.relationship = new Relationship("", "");
                 if (relationship != null)
                     relationship.copyTo(op.relationship);
-                op.obligation = obligation;
-                op.goal = goal;
-                op.goalVariable = goalVariable;
-                op.behavior = new BehaviorReference("", 0);
+                op.obligation = new Obligation("", "");
+                if (obligation != null)
+                    obligation.copyTo(op.obligation);
+                op.goal = new Goal("", "", false, 0);
+                if (goal != null)
+                    goal.copyTo(op.goal);
+                op.behavior = new Behavior("", "", 0);
                 if (behavior != null)
                     behavior.copyTo(op.behavior);
             }

@@ -14,7 +14,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 {
     public partial class LNSimpleInterface : Form
     {
-        enum LoadState { loadFile, loadStoryWorld, loadEntity, loadEndCondition, loadVerb, loadGoal };
+        enum LoadState { loadFile, loadStoryWorld, loadEntity, loadEntityGoal, loadEndCondition, loadEndConditionTarget, loadVerb, loadVerbCondition, loadVerbOperator, loadVerbGoal };
 
         private StoryWorld sw;
         private Engine engine;
@@ -41,6 +41,8 @@ namespace LudoNarrareSimpleInterfacePrototype
                 Entity currentEntity = null;
                 Verb currentVerb = null;
                 Goal currentGoal = null;
+                Condition currentCondition = null;
+                Operator currentOperator = null;
                 
                 while (reader.Read())
                 {
@@ -106,12 +108,16 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                             if (reader.Name == "Obligation" && ls == LoadState.loadEntity)
                             {
-                                string temp = "Obligation";
+                                Obligation temp = new Obligation("Obligation", "Verb");
 
                                 while (reader.MoveToNextAttribute())
                                 {
+                                    if (reader.Name == "name")
+                                        temp.name = reader.Value;
                                     if (reader.Name == "verb")
-                                        temp = reader.Value;
+                                        temp.verb = reader.Value;
+                                    if (reader.Name == "var")
+                                        temp.arguments.Add(reader.Value);
                                 }
 
                                 currentEntity.obligations.Add(temp);
@@ -119,30 +125,106 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                             if (reader.Name == "Goal" && ls == LoadState.loadEntity)
                             {
-                                string temp = "Goal";
+                                ls = LoadState.loadEntityGoal;
+                                currentGoal = new Goal("", "", false, 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
                                     if (reader.Name == "name")
-                                        temp = reader.Value;
+                                        currentGoal.name = reader.Value;
+                                    if (reader.Name == "subject")
+                                        currentGoal.operatorSubject = reader.Value;
+                                    if (reader.Name == "type")
+                                    {
+                                        if (reader.Value == "remove")
+                                            currentGoal.addRemove = false;
+                                        else
+                                            currentGoal.addRemove = true;
+                                    }
+                                }
+                            }
+                                
+                                //Load Goal target
+                                if (reader.Name == "Attribute" && ls == LoadState.loadEntityGoal)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentGoal.type = 0;
+                                            currentGoal.attribute = new Attribute(reader.Value);
+                                        }
+                                    }
                                 }
 
-                                currentEntity.goals.Add(temp);
-                            }
+                                if (reader.Name == "Relationship" && ls == LoadState.loadEntityGoal)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentGoal.type = 1;
+                                            currentGoal.relationship = new Relationship(reader.Value, "Object");
+                                        }
+                                        if (reader.Name == "object" && currentGoal.type == 1)
+                                            currentGoal.relationship.other = reader.Value;
+                                    }
+                                }
+
+                                if (reader.Name == "Obligation" && ls == LoadState.loadEntityGoal)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentGoal.type = 2;
+                                            currentGoal.obligation = new Obligation(reader.Value, "Verb");
+                                        }
+                                        if (reader.Name == "verb" && currentGoal.type == 2)
+                                            currentGoal.obligation.verb = reader.Value;
+                                        if (reader.Name == "var" && currentGoal.type == 2)
+                                            currentGoal.obligation.arguments.Add(reader.Value);
+                                    }
+                                }
+
+                                if (reader.Name == "Behavior" && ls == LoadState.loadEntityGoal)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentGoal.type = 4;
+                                            currentGoal.behavior = new Behavior(reader.Value, "Verb", 0);
+                                        }
+                                        if (reader.Name == "verb" && currentGoal.type == 4)
+                                            currentGoal.behavior.verb = reader.Value;
+                                        if (reader.Name == "chance" && currentGoal.type == 4)
+                                        {
+                                            if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
+                                                currentGoal.behavior.chance = 0;
+                                        }
+                                        if (reader.Name == "var" && currentGoal.type == 4)
+                                            currentGoal.behavior.arguments.Add(reader.Value);
+                                    }
+                                }
 
                             if (reader.Name == "Behavior" && ls == LoadState.loadEntity)
                             {
-                                BehaviorReference temp = new BehaviorReference("Behavior", 0);
+                                Behavior temp = new Behavior("Behavior", "Verb", 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
-                                    if (reader.Name == "verb")
+                                    if (reader.Name == "name")
                                         temp.name = reader.Value;
+                                    if (reader.Name == "verb")
+                                        temp.verb = reader.Value;
                                     if (reader.Name == "chance")
                                     {
                                         if (!Int32.TryParse(reader.Value, out temp.chance))
                                             temp.chance = 0;
                                     }
+                                    if (reader.Name == "var")
+                                        temp.arguments.Add(reader.Value);
                                 }
 
                                 currentEntity.behaviors.Add(temp);
@@ -154,37 +236,51 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                             if (reader.Name == "Condition" && ls == LoadState.loadEndCondition)
                             {
-                                Condition temp = new Condition("Condition", "Subject", false, 0);
+                                ls = LoadState.loadEndConditionTarget;
+                                currentCondition = new Condition("Condition", "Subject", false, 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
                                     if (reader.Name == "name")
-                                        temp.name = reader.Value;
+                                        currentCondition.name = reader.Value;
                                     if (reader.Name == "subject")
-                                        temp.conditionSubject = reader.Value;
+                                        currentCondition.conditionSubject = reader.Value;
                                     if (reader.Name == "negate")
                                     {
                                         if (reader.Value == "true")
-                                            temp.negate = true;
+                                            currentCondition.negate = true;
                                         else
-                                            temp.negate = false;
+                                            currentCondition.negate = false;
                                     }
-                                    if (reader.Name == "attribute")
+                                }
+                            }
+
+                                //Load end condition target
+                                if (reader.Name == "Attribute" && ls == LoadState.loadEndConditionTarget)
+                                {
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 0;
-                                        temp.attribute = new Attribute(reader.Value);
+                                        if (reader.Name == "name")
+                                        {
+                                            currentCondition.type = 0;
+                                            currentCondition.attribute = new Attribute(reader.Value);
+                                        }
                                     }
-                                    else if (reader.Name == "relationship")
-                                    {
-                                        temp.type = 1;
-                                        temp.relationship = new Relationship(reader.Value, "Object");
-                                    }
-                                    if (reader.Name == "object" && temp.type == 1)
-                                        temp.relationship.other = reader.Value;
                                 }
 
-                                sw.endConditions.Add(temp);
-                            }
+                                if (reader.Name == "Relationship" && ls == LoadState.loadEndConditionTarget)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentCondition.type = 1;
+                                            currentCondition.relationship = new Relationship(reader.Value, "Object");
+                                        }
+                                        if (reader.Name == "object" && currentCondition.type == 1)
+                                            currentCondition.relationship.other = reader.Value;
+                                    }
+                                }
 
                             //Read verb data
                             if (reader.Name == "Verb" && ls == LoadState.loadStoryWorld)
@@ -229,164 +325,222 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                             if (reader.Name == "Condition" && ls == LoadState.loadVerb)
                             {
-                                Condition temp = new Condition("Condition", "Subject", false, 0);
+                                ls = LoadState.loadVerbCondition;
+                                currentCondition = new Condition("Condition", "Subject", false, 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
                                     if (reader.Name == "name")
-                                        temp.name = reader.Value;
+                                        currentCondition.name = reader.Value;
                                     if (reader.Name == "subject")
-                                        temp.conditionSubject = reader.Value;
+                                        currentCondition.conditionSubject = reader.Value;
                                     if (reader.Name == "negate")
                                     {
                                         if (reader.Value == "true")
-                                            temp.negate = true;
+                                            currentCondition.negate = true;
                                         else
-                                            temp.negate = false;
+                                            currentCondition.negate = false;
                                     }
-                                    if (reader.Name == "attribute")
+                                }
+                            }
+
+                                //Load verb condition target
+                                if (reader.Name == "Attribute" && ls == LoadState.loadVerbCondition)
+                                {
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 0;
-                                        temp.attribute = new Attribute(reader.Value);
+                                        if (reader.Name == "name")
+                                        {
+                                            currentCondition.type = 0;
+                                            currentCondition.attribute = new Attribute(reader.Value);
+                                        }
                                     }
-                                    else if (reader.Name == "relationship")
-                                    {
-                                        temp.type = 1;
-                                        temp.relationship = new Relationship(reader.Value, "Object");
-                                    }
-                                    if (reader.Name == "object" && temp.type == 1)
-                                        temp.relationship.other = reader.Value;
                                 }
 
-                                currentVerb.conditions.Add(temp);
-                            }
+                                if (reader.Name == "Relationship" && ls == LoadState.loadVerbCondition)
+                                {
+                                    while (reader.MoveToNextAttribute())
+                                    {
+                                        if (reader.Name == "name")
+                                        {
+                                            currentCondition.type = 1;
+                                            currentCondition.relationship = new Relationship(reader.Value, "Object");
+                                        }
+                                        if (reader.Name == "object" && currentCondition.type == 1)
+                                            currentCondition.relationship.other = reader.Value;
+                                    }
+                                }
 
                             if (reader.Name == "Operator" && ls == LoadState.loadVerb)
                             {
-                                Operator temp = new Operator("Operator", "Subject", true, 0, "Obligation", "Goal", "?Var");
+                                ls = LoadState.loadVerbOperator;
+                                currentOperator = new Operator("Operator", "Subject", true, 0);
 
                                 while (reader.MoveToNextAttribute())
                                 {
                                     if (reader.Name == "name")
-                                        temp.name = reader.Value;
+                                        currentOperator.name = reader.Value;
                                     if (reader.Name == "subject")
-                                        temp.operatorSubject = reader.Value;
+                                        currentOperator.operatorSubject = reader.Value;
                                     if (reader.Name == "type")
                                     {
                                         if (reader.Value == "remove")
-                                            temp.addRemove = false;
+                                            currentOperator.addRemove = false;
                                         else
-                                            temp.addRemove = true;
+                                            currentOperator.addRemove = true;
                                     }
-                                    if (reader.Name == "attribute")
+                                }
+                            }
+
+                                //Load verb operator target
+                                if (reader.Name == "Attribute" && ls == LoadState.loadVerbOperator)
+                                {
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 0;
-                                        temp.attribute = new Attribute(reader.Value);
+                                        if (reader.Name == "name")
+                                        {
+                                            currentOperator.type = 0;
+                                            currentOperator.attribute = new Attribute(reader.Value);
+                                        }
                                     }
-                                    else if (reader.Name == "relationship")
+                                }
+
+                                if (reader.Name == "Relationship" && ls == LoadState.loadVerbOperator)
+                                {
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 1;
-                                        temp.relationship = new Relationship(reader.Value, "Object");
+                                        if (reader.Name == "name")
+                                        {
+                                            currentOperator.type = 1;
+                                            currentOperator.relationship = new Relationship(reader.Value, "Object");
+                                        }
+                                        if (reader.Name == "object" && currentOperator.type == 1)
+                                            currentOperator.relationship.other = reader.Value;
                                     }
-                                    else if (reader.Name == "obligation")
+                                }
+
+                                if (reader.Name == "Obligation" && ls == LoadState.loadVerbOperator)
+                                {
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 2;
-                                        temp.obligation = reader.Value;
+                                        if (reader.Name == "name")
+                                        {
+                                            currentOperator.type = 2;
+                                            currentOperator.obligation = new Obligation(reader.Value, "Verb");
+                                        }
+                                        if (reader.Name == "verb" && currentOperator.type == 2)
+                                            currentOperator.obligation.verb = reader.Value;
+                                        if (reader.Name == "var" && currentOperator.type == 2)
+                                            currentOperator.obligation.arguments.Add(reader.Value);
                                     }
-                                    else if (reader.Name == "goal")
+                                }
+
+                                if (reader.Name == "Goal" && ls == LoadState.loadVerbOperator)
+                                {
+                                    ls = LoadState.loadVerbGoal;
+                                    currentOperator.type = 3;
+                                    currentGoal = new Goal("", "", false, 0);
+
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        temp.type = 3;
-                                        temp.goal = reader.Value;
-                                    }
-                                    else if (reader.Name == "behavior")
-                                    {
-                                        temp.type = 4;
-                                        temp.behavior = new BehaviorReference(reader.Value, 0);
-                                    }
-                                    if (reader.Name == "object" && temp.type == 1)
-                                        temp.relationship.other = reader.Value;
-                                    if (reader.Name == "goalVariable" && temp.type == 3)
-                                        temp.goalVariable = reader.Value;
-                                    if (reader.Name == "chance" && temp.type == 4)
-                                    {
-                                        if (!Int32.TryParse(reader.Value, out temp.behavior.chance))
-                                            temp.behavior.chance = 0;
+                                        if (reader.Name == "name")
+                                            currentGoal.name = reader.Value;
+                                        if (reader.Name == "subject")
+                                            currentGoal.operatorSubject = reader.Value;
+                                        if (reader.Name == "type")
+                                        {
+                                            if (reader.Value == "remove")
+                                                currentGoal.addRemove = false;
+                                            else
+                                                currentGoal.addRemove = true;
+                                        }
                                     }
                                 }
                                 
-                                currentVerb.operators.Add(temp);
-                            }
+                                    //Load Goal target
+                                    if (reader.Name == "Attribute" && ls == LoadState.loadVerbGoal)
+                                    {
+                                        while (reader.MoveToNextAttribute())
+                                        {
+                                            if (reader.Name == "name")
+                                            {
+                                                currentGoal.type = 0;
+                                                currentGoal.attribute = new Attribute(reader.Value);
+                                            }
+                                        }
+                                    }
 
-                            //Read goal data
-                            if (reader.Name == "Goal" && ls == LoadState.loadStoryWorld)
-                            {
-                                ls = LoadState.loadGoal;
-                                currentGoal = new Goal("Goal");
-                                sw.goals.Add(currentGoal);
+                                    if (reader.Name == "Relationship" && ls == LoadState.loadVerbGoal)
+                                    {
+                                        while (reader.MoveToNextAttribute())
+                                        {
+                                            if (reader.Name == "name")
+                                            {
+                                                currentGoal.type = 1;
+                                                currentGoal.relationship = new Relationship(reader.Value, "Object");
+                                            }
+                                            if (reader.Name == "object" && currentGoal.type == 1)
+                                                currentGoal.relationship.other = reader.Value;
+                                        }
+                                    }
 
-                                while (reader.MoveToNextAttribute())
+                                    if (reader.Name == "Obligation" && ls == LoadState.loadVerbGoal)
+                                    {
+                                        while (reader.MoveToNextAttribute())
+                                        {
+                                            if (reader.Name == "name")
+                                            {
+                                                currentGoal.type = 2;
+                                                currentGoal.obligation = new Obligation(reader.Value, "Verb");
+                                            }
+                                            if (reader.Name == "verb" && currentGoal.type == 2)
+                                                currentGoal.obligation.verb = reader.Value;
+                                            if (reader.Name == "var" && currentGoal.type == 2)
+                                                currentGoal.obligation.arguments.Add(reader.Value);
+                                        }
+                                    }
+
+                                    if (reader.Name == "Behavior" && ls == LoadState.loadVerbGoal)
+                                    {
+                                        while (reader.MoveToNextAttribute())
+                                        {
+                                            if (reader.Name == "name")
+                                            {
+                                                currentGoal.type = 4;
+                                                currentGoal.behavior = new Behavior(reader.Value, "Verb", 0);
+                                            }
+                                            if (reader.Name == "verb" && currentGoal.type == 4)
+                                                currentGoal.behavior.verb = reader.Value;
+                                            if (reader.Name == "chance" && currentGoal.type == 4)
+                                            {
+                                                if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
+                                                    currentGoal.behavior.chance = 0;
+                                            }
+                                            if (reader.Name == "var" && currentGoal.type == 4)
+                                                currentGoal.behavior.arguments.Add(reader.Value);
+                                        }
+                                    }
+
+                                if (reader.Name == "Behavior" && ls == LoadState.loadVerbOperator)
                                 {
-                                    if (reader.Name == "name")
-                                        currentGoal.name = reader.Value;
-                                }
-                            }
-
-                            if (reader.Name == "Operator" && ls == LoadState.loadGoal)
-                            {
-                                Operator temp = new Operator("Operator", "Subject", true, 0, "Obligation", "Goal", "?Var");
-
-                                while (reader.MoveToNextAttribute())
-                                {
-                                    if (reader.Name == "name")
-                                        temp.name = reader.Value;
-                                    if (reader.Name == "subject")
-                                        temp.operatorSubject = reader.Value;
-                                    if (reader.Name == "type")
+                                    while (reader.MoveToNextAttribute())
                                     {
-                                        if (reader.Value == "remove")
-                                            temp.addRemove = false;
-                                        else
-                                            temp.addRemove = true;
-                                    }
-                                    if (reader.Name == "attribute")
-                                    {
-                                        temp.type = 0;
-                                        temp.attribute = new Attribute(reader.Value);
-                                    }
-                                    else if (reader.Name == "relationship")
-                                    {
-                                        temp.type = 1;
-                                        temp.relationship = new Relationship(reader.Value, "Object");
-                                    }
-                                    else if (reader.Name == "obligation")
-                                    {
-                                        temp.type = 2;
-                                        temp.obligation = reader.Value;
-                                    }
-                                    else if (reader.Name == "goal")
-                                    {
-                                        temp.type = 3;
-                                        temp.goal = reader.Value;
-                                    }
-                                    else if (reader.Name == "behavior")
-                                    {
-                                        temp.type = 4;
-                                        temp.behavior = new BehaviorReference(reader.Value, 0);
-                                    }
-                                    if (reader.Name == "object" && temp.type == 1)
-                                        temp.relationship.other = reader.Value;
-                                    if (reader.Name == "goalVariable" && temp.type == 3)
-                                        temp.goalVariable = reader.Value;
-                                    if (reader.Name == "chance" && temp.type == 4)
-                                    {
-                                        if (!Int32.TryParse(reader.Value, out temp.behavior.chance))
-                                            temp.behavior.chance = 0;
+                                        if (reader.Name == "name")
+                                        {
+                                            currentOperator.type = 4;
+                                            currentOperator.behavior = new Behavior(reader.Value, "Verb", 0);                                         
+                                        }
+                                        if (reader.Name == "verb" && currentOperator.type == 4)
+                                            currentOperator.behavior.verb = reader.Value;
+                                        if (reader.Name == "chance" && currentOperator.type == 4)
+                                        {
+                                            if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
+                                                currentOperator.behavior.chance = 0;
+                                        }
+                                        if (reader.Name == "var" && currentOperator.type == 4)
+                                            currentOperator.behavior.arguments.Add(reader.Value);
                                     }
                                 }
-
-                                currentGoal.goalOperator = temp;
-                            }
-
                             break;
                         case XmlNodeType.EndElement:
                             //Back out of story world data
@@ -397,17 +551,48 @@ namespace LudoNarrareSimpleInterfacePrototype
                             if (reader.Name == "Entity" && ls == LoadState.loadEntity)
                                 ls = LoadState.loadStoryWorld;
 
+                            //Back out of entity goal
+                            if (reader.Name == "Goal" && ls == LoadState.loadEntityGoal)
+                            {
+                                currentEntity.goals.Add(currentGoal);
+                                ls = LoadState.loadEntity;
+                            }
+
                             //Back out of end conditions
                             if (reader.Name == "EndConditions" && ls == LoadState.loadEndCondition)
                                 ls = LoadState.loadStoryWorld;
+
+                            //Back out of end condition
+                            if (reader.Name == "Condition" && ls == LoadState.loadEndConditionTarget)
+                            {
+                                sw.endConditions.Add(currentCondition);
+                                ls = LoadState.loadEndCondition;
+                            }
 
                             //Back out of verbs
                             if (reader.Name == "Verb" && ls == LoadState.loadVerb)
                                 ls = LoadState.loadStoryWorld;
 
-                            //Back out of goal data
-                            if (reader.Name == "Goal" && ls == LoadState.loadGoal)
-                                ls = LoadState.loadStoryWorld;
+                            //Back out of verb condition
+                            if (reader.Name == "Condition" && ls == LoadState.loadVerbCondition)
+                            {
+                                currentVerb.conditions.Add(currentCondition);
+                                ls = LoadState.loadVerb;
+                            }
+
+                            //Back out of verb operator
+                            if (reader.Name == "Operator" && ls == LoadState.loadVerbOperator)
+                            {
+                                currentVerb.operators.Add(currentOperator);
+                                ls = LoadState.loadVerb;
+                            }
+
+                            //Back out of verb goal data
+                            if (reader.Name == "Goal" && ls == LoadState.loadVerbGoal)
+                            {
+                                currentOperator.goal = currentGoal;
+                                ls = LoadState.loadVerbOperator;
+                            }
 
                             break;
                     }

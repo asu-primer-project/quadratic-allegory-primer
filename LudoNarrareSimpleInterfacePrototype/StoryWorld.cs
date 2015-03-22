@@ -14,7 +14,6 @@ namespace LudoNarrareSimpleInterfacePrototype
         public List<Entity> entities;
         public List<Condition> endConditions;
         public List<Verb> verbs;
-        public List<Goal> goals;
 
         /* Functions */
         public StoryWorld(string _name, string _userEntity)
@@ -28,8 +27,45 @@ namespace LudoNarrareSimpleInterfacePrototype
             Verb vTemp = new Verb("Wait");
             vTemp.input.Add("Wait.");
             verbs.Add(vTemp);
+        }
 
-            goals = new List<Goal>();
+        public string getPrintedObligation(Obligation ob)
+        {
+            string s = "";
+            s += ("Obligation: " + ob.name + " | Verb: " + ob.verb);
+            for (int i = 0; i < ob.arguments.Count; i++)
+                s += (" | Var: " + ob.arguments[i]);
+            return s;
+        }
+
+        public string getPrintedBehavior(Behavior b)
+        {
+            string s = "";
+            s += ("Behavior: " + b.name + " | Verb: " + b.name + " | Chance: " + b.chance);
+            for (int i = 0; i < b.arguments.Count; i++)
+                s += (" | Var: " + b.arguments[i]);
+            return s;
+        }
+
+        public string getPrintedGoal(Goal g)
+        {
+            string s = "";
+            s += ("Goal: " + g.name + " -> ");
+            s += ("(Subject: " + g.operatorSubject);
+            if (g.addRemove)
+                s += (" | Type: Add ");
+            else
+                s += (" | Type: Remove ");
+
+            if (g.type == 0)
+                s += ("| Attribute: " + g.attribute.name + ")");
+            else if (g.type == 1)
+                s += ("| Relationship: " + g.relationship.name + "|  Object: " + g.relationship.other + ")");
+            else if (g.type == 2)
+                s += ("| "+ getPrintedObligation(g.obligation) + ")");
+            else if (g.type == 3)
+                s += ("| " + getPrintedBehavior(g.behavior) + ")");
+            return s;
         }
 
         public string getPrintedWorldState()
@@ -63,19 +99,19 @@ namespace LudoNarrareSimpleInterfacePrototype
                     if (entities[i].obligations.Count > 0)
                     {
                         for (int j = 0; j < entities[i].obligations.Count; j++)
-                            temp += ("\t\tObligation: " + entities[i].obligations[j] + "\n");
+                            temp += ("\t\t" + getPrintedObligation(entities[i].obligations[j]) + "\n");
                     }
 
                     if (entities[i].goals.Count > 0)
                     {
                         for (int j = 0; j < entities[i].goals.Count; j++)
-                            temp += ("\t\tGoal: " + entities[i].goals[j] + "\n");
+                            temp += ("\t\t" + getPrintedGoal(entities[i].goals[j]) + "\n");
                     }
 
                     if (entities[i].behaviors.Count > 0)
                     {
                         for (int j = 0; j < entities[i].behaviors.Count; j++)
-                            temp += ("\t\tBehavior: " + entities[i].behaviors[j].name + " | Chance: " + entities[i].behaviors[j].chance + "\n");
+                            temp += ("\t\t" + getPrintedBehavior(entities[i].behaviors[j]) + "\n");
                     }
 
                     temp += "\t}\n";
@@ -165,42 +201,17 @@ namespace LudoNarrareSimpleInterfacePrototype
                             else if (verbs[i].operators[j].type == 1)
                                 temp += ("| Relationship: " + verbs[i].operators[j].relationship.name + "|  Object: " + verbs[i].operators[j].relationship.other + ")\n");
                             else if (verbs[i].operators[j].type == 2)
-                                temp += ("| Obligation: " + verbs[i].operators[j].obligation + ")\n");
+                                temp += ("| " + getPrintedObligation(verbs[i].operators[j].obligation) + ")\n");
                             else if (verbs[i].operators[j].type == 3)
-                                temp += ("| Goal: " + verbs[i].operators[j].goal + " | Goal Variable: " + verbs[i].operators[j].goalVariable + ")\n");
+                                temp += ("| " + getPrintedGoal(verbs[i].operators[j].goal) + ")\n");
                             else if (verbs[i].operators[j].type == 4)
-                                temp += ("| Behavior: " + verbs[i].operators[j].behavior.name + " | Behavior Chance: " + verbs[i].operators[j].behavior.chance + ")\n");
+                                temp += ("| " + getPrintedBehavior(verbs[i].operators[j].behavior) + ")\n");
                         }
                     }
 
                     temp += "\t}\n";
                 }
-            }
-
-            if (goals.Count > 0)
-            {
-                for (int i = 0; i < goals.Count; i++)
-                {
-                    temp += ("\tGoal: " + goals[i].name + "\n");
-                    temp += ("\tOperator: " + goals[i].goalOperator.name + " -> ");
-                    temp += ("(Subject: " + goals[i].goalOperator.operatorSubject);
-                    if (goals[i].goalOperator.addRemove)
-                        temp += (" | Type: Add ");
-                    else
-                        temp += (" | Type: Remove ");
-
-                    if (goals[i].goalOperator.type == 0)
-                        temp += ("| Attribute: " + goals[i].goalOperator.attribute.name + ")\n");
-                    else if (goals[i].goalOperator.type == 1)
-                        temp += ("| Relationship: " + goals[i].goalOperator.relationship.name + " | Object: " + goals[i].goalOperator.relationship.other + ")\n");
-                    else if (goals[i].goalOperator.type == 2)
-                        temp += ("| Obligation: " + goals[i].goalOperator.obligation + ")\n");
-                    else if (goals[i].goalOperator.type == 3)
-                        temp += ("| Goal: " + goals[i].goalOperator.goal + " | Goal Variable: " + goals[i].goalOperator.goalVariable + ")\n");
-                    else if (goals[i].goalOperator.type == 4)
-                        temp += ("| Behavior: " + goals[i].goalOperator.behavior.name + " | Behavior Chance: " + goals[i].goalOperator.behavior.chance + ")\n");
-                }
-            }
+            }            
 
             temp += "}";
             return temp;

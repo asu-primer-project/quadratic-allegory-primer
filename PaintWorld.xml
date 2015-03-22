@@ -1,5 +1,17 @@
 <?xml version="1.0"?>
 <!-- Story world for very basic testing of conditions and operators plus static verbs. Authored by J. M. Stark. -->
+<!--
+	This is the first functioning story world made for LudoNarrare, and thus it has brought up some interesting design
+	considerations, especially regarding the AI. If the user, Jane, waits without the paintbrush in hand, Jim will be
+    forced to pick up the paintbrush, locking Jane out of any action (all except wait require the brush available or in hand).
+	This leaves the user in position where they have no input until the AI decides to put them in that state again. These
+	types of scenarios should be designed to be rare. Also, when Jane can't do anything because Jim has the brush, Jim's
+	leaning towards waiting makes enormous amounts of time pass in between the Jane having something to do. Wait
+	should probably be used carefully around AI. Finally, while obligations in some cases can apply to human entities,
+	they were invented more with automatons, machinary, and physical necessity in mind. The obligation for Jim to pick
+	up the brush is weird.
+-->
+
 <StoryWorld name="Paint World" userEntity="Jane">
 	
 	<!-- Entities -->
@@ -10,13 +22,13 @@
 	<Entity name="Jim">
 		<Attribute name="Blue"/>
 		
-		<Obligation verb="Pick Up Paintbrush" />
+		<Obligation name="Pick up paintbrush" verb="Pick Up Paintbrush" />
 		
-		<Behavior verb="Paint Red" chance="2"/>
-		<Behavior verb="Paint Yellow" chance="2"/>
-		<Behavior verb="Paint Blue" chance="2"/>
-		<Behavior verb="Put Down Paintbrush" chance="2" />
-		<Behavior verb="Wait" chance = "1"/>
+		<Behavior name="Paint self red" verb="Paint Red" chance="2"/>
+		<Behavior name="Paint self yellow" verb="Paint Yellow" chance="2"/>
+		<Behavior name="Paint self blue" verb="Paint Blue" chance="2"/>
+		<Behavior name="Put down paintbrush" verb="Put Down Paintbrush" chance="2" />
+		<Behavior name="Wait" verb="Wait" chance = "3"/>
 	</Entity>
 	
 	<Entity name="Paintbrush">
@@ -29,12 +41,22 @@
 		<Out text="?me" />
 		<Out text="paints their self red." />
 
-		<Condition name="Is not already red" subject="?me" negate="true" attribute="Red" />
-		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		<Condition name="Is not already red" subject="?me" negate="true">
+			<Attribute name="Red" />
+		</Condition>
+		<Condition name="Has the paintbrush" subject="?me" negate="false">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Condition>
 		
-		<Operator name="Change to red" subject="?me" type="add" attribute="Red" />
-		<Operator name="Remove yellow" subject="?me" type="remove" attribute="Yellow" />
-		<Operator name="Remove blue" subject="?me" type="remove" attribute="Blue" />
+		<Operator name="Change to red" subject="?me" type="add">
+			<Attribute name="Red" />
+		</Operator>	
+		<Operator name="Remove yellow" subject="?me" type="remove">
+			<Attribute name="Yellow" />
+		</Operator>	
+		<Operator name="Remove blue" subject="?me" type="remove">
+			<Attribute name="Blue" />
+		</Operator>	
 	</Verb>
 
 	<Verb name="Paint Yellow">
@@ -43,12 +65,22 @@
 		<Out text="?me" />
 		<Out text="paints their self yellow." />
 		
-		<Condition name="Is not already yellow" subject="?me" negate="true" attribute="Yellow" />
-		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		<Condition name="Is not already yellow" subject="?me" negate="true">
+			<Attribute name="Yellow" />
+		</Condition>
+		<Condition name="Has the paintbrush" subject="?me" negate="false">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Condition>
 		
-		<Operator name="Change to yellow" subject="?me" type="add" attribute="Yellow" />
-		<Operator name="Remove red" subject="?me" type="remove" attribute="Red" />
-		<Operator name="Remove blue" subject="?me" type="remove" attribute="Blue" />
+		<Operator name="Change to yellow" subject="?me" type="add">
+			<Attribute name="Yellow" />
+		</Operator>	
+		<Operator name="Remove red" subject="?me" type="remove">
+			<Attribute name="Red" />
+		</Operator>	
+		<Operator name="Remove blue" subject="?me" type="remove">
+			<Attribute name="Blue" />
+		</Operator>	
 	</Verb>
 	
 	<Verb name="Paint Blue">
@@ -57,12 +89,22 @@
 		<Out text="?me" />
 		<Out text="paints their self blue." />
 
-		<Condition name="Is not already blue" subject="?me" negate="true" attribute="Blue" />
-		<Condition name="Has the paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		<Condition name="Is not already blue" subject="?me" negate="true">
+			<Attribute name="Blue" />
+		</Condition>
+		<Condition name="Has the paintbrush" subject="?me" negate="false">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Condition>
 		
-		<Operator name="Change to blue" subject="?me" type="add" attribute="Blue" />
-		<Operator name="Remove red" subject="?me" type="remove" attribute="Red" />
-		<Operator name="Remove yellow" subject="?me" type="remove" attribute="Yellow" />
+		<Operator name="Change to blue" subject="?me" type="add">
+			<Attribute name="Blue" />
+		</Operator>	
+		<Operator name="Remove yellow" subject="?me" type="remove">
+			<Attribute name="Yellow" />
+		</Operator>	
+		<Operator name="Remove red" subject="?me" type="remove">
+			<Attribute name="Red" />
+		</Operator>	
 	</Verb>
 	
 	<Verb name="Pick Up Paintbrush">
@@ -71,10 +113,16 @@
 		<Out text="?me" />
 		<Out text="picked up the paintbrush." />
 		
-		<Condition name="Paintbrush is not already being held" subject="Paintbrush" negate="true" attribute="Held" />
+		<Condition name="Paintbrush is not already being held" subject="Paintbrush" negate="true">
+			<Attribute name="Held" />
+		</Condition>
 		
-		<Operator name="The paintbrush holder has brush" subject="?me" type="add" relationship="Holding" object="Paintbrush" />
-		<Operator name="The paintbrush is now in a held state" subject="Paintbrush" type="add" attribute="Held" />
+		<Operator name="The paintbrush holder has brush" subject="?me" type="add">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Operator>
+		<Operator name="The paintbrush is now in a held state" subject="Paintbrush" type="add">
+			<Attribute name="Held" />
+		</Operator>
 	</Verb>
 	
 	<Verb name="Put Down Paintbrush">
@@ -83,10 +131,16 @@
 		<Out text="?me" />
 		<Out text="put down the paintbrush." />
 		
-		<Condition name="I am the one holding paintbrush" subject="?me" negate="false" relationship="Holding" object="Paintbrush" />
+		<Condition name="I am the one holding paintbrush" subject="?me" negate="false">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Condition>
 		
-		<Operator name="The paintbrush holder puts down brush" subject="?me" type="remove" relationship="Holding" object="Paintbrush" />
-		<Operator name="The paintbrush is not in a held state" subject="Paintbrush" type="remove" attribute="Held" />	
+		<Operator name="The paintbrush holder puts down brush" subject="?me" type="remove">
+			<Relationship name="Holding" object="Paintbrush" />
+		</Operator>
+		<Operator name="The paintbrush is not in a held state" subject="Paintbrush" type="remove">
+			<Attribute name="Held" />
+		</Operator>
 	</Verb>
 	
 </StoryWorld>

@@ -119,7 +119,6 @@ namespace LudoNarrareSimpleInterfacePrototype
             }
 
             //Remove those which don't match conditions
-            
             for (int i = 0; i < thoseToRemove.Count; i++ )
                 list.RemoveAll(x => x.name == thoseToRemove[i]);
 
@@ -219,17 +218,17 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
                             break;
                         case 2:
-                            if (subject.obligations.Find(x => x == o.obligation) == null && subject.name != storyWorld.userEntity)
+                            if (subject.obligations.Find(x => x.name == o.obligation.name) == null && subject.name != storyWorld.userEntity)
                                 subject.obligations.Add(o.obligation);
                             break;
                         case 3:
-                            if (subject.goals.Find(x => x == o.goal) == null && subject.name != storyWorld.userEntity)
+                            if (subject.goals.Find(x => x.name == o.goal.name) == null && subject.name != storyWorld.userEntity)
                                 subject.goals.Add(o.goal);
                             break;
                         case 4:
                             if (o.behavior != null && subject.name != storyWorld.userEntity)
                             {
-                                BehaviorReference tempB = new BehaviorReference("", 0);
+                                Behavior tempB = new Behavior("", "", 0);
                                 o.behavior.copyTo(tempB);
                                 if (subject.behaviors.Find(x => x.name == tempB.name) == null)
                                     subject.behaviors.Add(tempB);
@@ -267,6 +266,8 @@ namespace LudoNarrareSimpleInterfacePrototype
             }
         }
 
+        /* TODO */
+        /* Rewrite to handle execution of variable verbs; handle both user variable choices and AI variable choices. */
         //Has side-effects...
         public string executeVerb(Verb v)
         {
@@ -303,46 +304,49 @@ namespace LudoNarrareSimpleInterfacePrototype
             for (int i = 0; i < actors.Count; i++)
                 AIAct(actors[i]);
         }
-
+        
+        /* TODO */
+        /* If the verb has variables, the AI uses its behavior vars or searches for tree paths matching the goals. */
         public void AIAct(Entity e)
         {
             List<Verb> possibleActions = generatePossibleVerbs(e);
-            Verb choice = null;
+            string choice = "";
 
             //Any obligations?
             if (e.obligations.Count > 0)
             {
-                List<Verb> possibleObligations = possibleActions.FindAll(x => e.obligations.Contains(x.name));
+                List<Obligation> possibleObligations = new List<Obligation>();
+                for (int i = 0; i < possibleActions.Count; i++ )
+                    possibleObligations.AddRange(e.obligations.FindAll(x => x.verb == possibleActions[i].name));
+
                 if (possibleObligations.Count > 0)
                 {
                     Random r = new Random(DateTime.Now.Millisecond);
-                    choice = possibleObligations[r.Next(0, possibleObligations.Count)];
+                    choice = possibleObligations[r.Next(0, possibleObligations.Count)].verb;
                 }        
             }
 
             //Any goals?
-            if (choice == null && e.goals.Count > 0)
+            if (choice == "" && e.goals.Count > 0)
             {
-                List<Goal> eGoals = storyWorld.goals.FindAll(x => e.goals.Contains(x.name));
                 List<Verb> possibleGoalVerbs = new List<Verb>();
-                for (int i = 0; i < eGoals.Count; i++ )
-                    possibleGoalVerbs.AddRange(possibleActions.FindAll(x => x.operators.Contains<Operator>(eGoals[i].goalOperator)));          
+                for (int i = 0; i < e.goals.Count; i++ )
+                    possibleGoalVerbs.AddRange(possibleActions.FindAll(x => x.operators.Find(y => e.goals[i].matchWith(y)) != null));          
 
                 if (possibleGoalVerbs.Count > 0)
                 {
                     Random r = new Random(DateTime.Now.Millisecond);
-                    choice = possibleGoalVerbs[r.Next(0, possibleGoalVerbs.Count)];
+                    choice = possibleGoalVerbs[r.Next(0, possibleGoalVerbs.Count)].name;
                 }
             }
 
             //Any behaviors?
-            if (choice == null && e.behaviors.Count > 0)
+            if (choice == "" && e.behaviors.Count > 0)
             {
-                List<string> verbNames = new List<string>();
-                for (int i = 0; i < possibleActions.Count; i++ )
-                    verbNames.Add(possibleActions[i].name);
+                List<Behavior> possibleBehaviors = new List<Behavior>();
+                for (int i = 0; i < possibleActions.Count; i++)
+                    possibleBehaviors.AddRange(e.behaviors.FindAll(x => x.verb == possibleActions[i].name));
 
-                List<BehaviorReference> possibleBehaviors = e.behaviors.FindAll(x => verbNames.Contains(x.name));
                 if (possibleBehaviors.Count > 0)
                 {
                     List<string> ballSpinner = new List<string>();
@@ -350,17 +354,16 @@ namespace LudoNarrareSimpleInterfacePrototype
                     for (int i = 0; i < possibleBehaviors.Count; i++ )
                     {
                         for (int j = 0; j < possibleBehaviors[i].chance; j++)
-                            ballSpinner.Add(possibleBehaviors[i].name);
+                            ballSpinner.Add(possibleBehaviors[i].verb);
                     }
 
                     Random r = new Random(DateTime.Now.Millisecond);
-                    string c = ballSpinner[r.Next(0, ballSpinner.Count)];
-                    choice = possibleActions.Find(x => x.name == c);
+                    choice = ballSpinner[r.Next(0, ballSpinner.Count)];
                 }
             }
 
-            if (choice.name != "Wait" && choice != null)
-                output += (tick + ": " + executeVerb(choice) + "\n");
+            if (choice != "Wait" && choice != "")
+                output += (tick + ": " + executeVerb(possibleActions.Find(x => x.name == choice)) + "\n");
         }
     }
 }
