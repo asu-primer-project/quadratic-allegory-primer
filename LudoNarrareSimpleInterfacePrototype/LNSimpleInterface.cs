@@ -14,7 +14,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 {
     public partial class LNSimpleInterface : Form
     {
-        enum LoadState { loadFile, loadStoryWorld, loadEntity, loadEntityGoal, loadEndCondition, loadEndConditionTarget, loadVerb, loadVerbCondition, loadVerbOperator, loadVerbGoal };
+        enum LoadState { loadFile, loadStoryWorld, loadEntity, loadEntityGoal, loadEndCondition, loadVerb, loadVerbCondition, loadVerbOperator, loadVerbGoal };
 
         private StoryWorld sw;
         private Engine engine;
@@ -231,12 +231,9 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
                             
                             //Read end condition data
-                            if (reader.Name == "EndConditions" && ls == LoadState.loadStoryWorld)
-                                ls = LoadState.loadEndCondition;
-
-                            if (reader.Name == "Condition" && ls == LoadState.loadEndCondition)
+                            if (reader.Name == "EndCondition" && ls == LoadState.loadStoryWorld)
                             {
-                                ls = LoadState.loadEndConditionTarget;
+                                ls = LoadState.loadEndCondition;
                                 currentCondition = new Condition("Condition", "Subject", false, 0);
 
                                 while (reader.MoveToNextAttribute())
@@ -256,7 +253,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                             }
 
                                 //Load end condition target
-                                if (reader.Name == "Attribute" && ls == LoadState.loadEndConditionTarget)
+                                if (reader.Name == "Attribute" && ls == LoadState.loadEndCondition)
                                 {
                                     while (reader.MoveToNextAttribute())
                                     {
@@ -268,7 +265,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                     }
                                 }
 
-                                if (reader.Name == "Relationship" && ls == LoadState.loadEndConditionTarget)
+                                if (reader.Name == "Relationship" && ls == LoadState.loadEndCondition)
                                 {
                                     while (reader.MoveToNextAttribute())
                                     {
@@ -558,15 +555,11 @@ namespace LudoNarrareSimpleInterfacePrototype
                                 ls = LoadState.loadEntity;
                             }
 
-                            //Back out of end conditions
-                            if (reader.Name == "EndConditions" && ls == LoadState.loadEndCondition)
-                                ls = LoadState.loadStoryWorld;
-
                             //Back out of end condition
-                            if (reader.Name == "Condition" && ls == LoadState.loadEndConditionTarget)
+                            if (reader.Name == "EndCondition" && ls == LoadState.loadEndCondition)
                             {
                                 sw.endConditions.Add(currentCondition);
-                                ls = LoadState.loadEndCondition;
+                                ls = LoadState.loadStoryWorld;
                             }
 
                             //Back out of verbs

@@ -143,4 +143,9 @@
 		</Operator>
 	</Verb>
 	
+	<!--- End Conditions -->
+	<EndCondition name="Jane is yellow." subject="Jane" negate="false">
+		<Attribute name="Yellow" />
+	</EndCondition>
+	
 </StoryWorld>

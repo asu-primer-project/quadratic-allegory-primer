@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <StoryWorld name="Walk World" userEntity="Robo12">
-	
+
 	<!-- Entities -->
 	<Entity name="Robo12">
 		<Attribute name="Robot"/>
@@ -58,7 +58,7 @@
 		<In text="Walk to" />
 		<In text="?toLocation" />
 		<In text="from" />
-		<In text="?fromLocation" /> <!-- Weird deal here, there will only ever be one option available here, but it still gets a combobox; can't think of an easy distinction to call it out on -->
+		<In text="?fromLocation" />
 		
 		<Out text="?me" />
 		<Out text="walks to" />

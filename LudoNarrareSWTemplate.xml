@@ -3,6 +3,14 @@
 <StoryWorld name="..." userEntity="...">
 	
 	<!-- Story World Attributes -->
+	<!-- Begin Text Template
+	<Begin text="..."/>
+	-->
+	
+	<!-- End Text Template
+	<End text="..."/>
+	-->
+	
 	<!-- Attribute Template
 	<Attribute name="..." />
 	-->
@@ -53,11 +61,9 @@
 	-->
 	
 	<!-- End Condition Template 
-	<EndConditions>
-		<Condition name="..." subject="..." negate="...">
-			<Attribute name="..." /> || <Relationship name="..." object="..." />
-		</Condition>
-	</EndConditions>
+	<EndCondition name="..." subject="..." negate="...">
+		<Attribute name="..." /> || <Relationship name="..." object="..." />
+	</EndCondition>
 	-->
 	
 	<!-- Verb Template

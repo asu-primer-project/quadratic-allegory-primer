@@ -13,7 +13,8 @@ namespace LudoNarrareSimpleInterfacePrototype
         public int tick;
         public string output;
         public bool waitingForInput;
-        public List<Verb> currentUserChoices; 
+        public List<Verb> currentUserChoices;
+        public bool ended;
 
         /* Functions */
         public Engine(StoryWorld _storyWorld)
@@ -23,34 +24,56 @@ namespace LudoNarrareSimpleInterfacePrototype
             output = "";
             waitingForInput = false;
             currentUserChoices = null;
+            ended = false;
+        }
+
+        public bool checkEndConditions()
+        {
+            for (int i = 0; i < storyWorld.endConditions.Count; i++)
+            {
+                if (checkCondition(storyWorld.endConditions[i]))
+                {
+                    //Ugly hard coded ending
+                    output += "=-):>    THE END    <:(-=";
+                    return true;
+                }                    
+            }
+
+            return false;
         }
 
         public void takeInputAndProcess(Verb choice)
         {
-            //Handle user action
-            waitingForInput = false;
-            
-            if (choice.name != "Wait")
-                output += (tick + ": " + executeVerb(choice) + "\n");
-
-            //Handle AI
-            handleAI();
-            tick++;
-
-            //Now wait for input again
-            currentUserChoices = generatePossibleVerbs(storyWorld.entities.Find(x => x.name == storyWorld.userEntity));
-
-            while (currentUserChoices.Count <= 1)
+            if (!ended)
             {
+                //Handle user action
+                waitingForInput = false;
+
+                if (choice.name != "Wait")
+                    output += (tick + ": " + executeVerb(choice) + "\n");
+                
+                //End at user action if end met
+                ended = checkEndConditions();
+
                 //Handle AI
                 handleAI();
                 tick++;
 
                 //Now wait for input again
                 currentUserChoices = generatePossibleVerbs(storyWorld.entities.Find(x => x.name == storyWorld.userEntity));
-            }
 
-            waitingForInput = true;
+                while (currentUserChoices.Count <= 1)
+                {
+                    //Handle AI
+                    handleAI();
+                    tick++;
+
+                    //Now wait for input again
+                    currentUserChoices = generatePossibleVerbs(storyWorld.entities.Find(x => x.name == storyWorld.userEntity));
+                }
+
+                waitingForInput = true;
+            }
         }
 
         public void init()
@@ -69,6 +92,54 @@ namespace LudoNarrareSimpleInterfacePrototype
                 s = Char.ToUpper(s[0]) + s.Substring(1);
             }
             return s;
+        }
+
+        public bool isEntitySolution(Entity e, Verb v, string var)
+        {
+            //Get all conditions pertaining to the variable, replace the variable with the candidate entity, and then check if the entity works as a solution.
+            List<Condition> varConditions = new List<Condition>();
+
+            for (int i = 0; i < v.conditions.Count; i++)
+            {
+                if (v.conditions[i].conditionSubject == var || v.conditions[i].relationship.other == var)
+                {
+                    Condition tempC = new Condition("", "", false, 0);
+                    v.conditions[i].copyTo(tempC);
+                    tempC.replaceWith(var, e.name);
+                    varConditions.Add(tempC);
+                }
+            }
+
+            for (int i = 0; i < varConditions.Count; i++)
+            {
+                if (!checkCondition(varConditions[i]))
+                    return false;
+            }
+
+            return true;
+        }
+
+        public void buildDVT(DynamicVerbTreeNode r, Verb v, int h)
+        {
+            if (h < (v.variables.Count - 1))
+            {
+                for (int i = 0; i < storyWorld.entities.Count; i++)
+                {
+                    if (isEntitySolution(storyWorld.entities[i], v, v.variables[h + 1]))
+                    {
+                        DynamicVerbTreeNode child = new DynamicVerbTreeNode(storyWorld.entities[i]);
+                        r.children.Add(child);
+
+                        //Create new version of verb with child as solution, then build that tree
+                        Verb newV = new Verb("");
+                        v.copyTo(newV);
+                        newV.replaceWith(newV.variables[h + 1], child.data.name);
+                        buildDVT(child, newV, h + 1);
+                    }
+                }
+            }
+            else
+                return;
         }
 
         public List<Verb> generatePossibleVerbs(Entity e)
@@ -103,17 +174,9 @@ namespace LudoNarrareSimpleInterfacePrototype
                 {
                     list[i].root = new DynamicVerbTreeNode(e);
                     DynamicVerbTreeNode currentDVT = list[i].root;
-                    
-                    for (int j = 1; j < list[i].variables.Count; j++ )
-                    {
-                        for (int k = 0; k < storyWorld.entities.Count; k++ )
-                        {
-                            if (isEntitySolution(storyWorld.entities[k], list[i], list[i].variables[j]))
-                                currentDVT.children.Add(new DynamicVerbTreeNode(storyWorld.entities[k]));
-                        }
-                    }
+                    buildDVT(list[i].root, list[i], 0);
 
-                    if (currentDVT.getHeight(0) < list[i].variables.Count)
+                    if (currentDVT.getHeight(0) < (list[i].variables.Count - 1))
                         thoseToRemove.Add(list[i].name);
                 }
             }
@@ -163,31 +226,6 @@ namespace LudoNarrareSimpleInterfacePrototype
                 return false;
         }
         
-        public bool isEntitySolution(Entity e, Verb v, string varName)
-        {
-            //Get all conditions pertaining to the variable, replace the variable with the candidate entity, and then check if the entity works as a solution.
-            List<Condition> varConditions = new List<Condition>();
-
-            for (int i = 0; i < v.conditions.Count; i++ )
-            {
-                if (v.conditions[i].conditionSubject == varName)
-                {
-                    Condition tempC = new Condition("", "", false, 0);
-                    v.conditions[i].copyTo(tempC);
-                    tempC.replaceWith(varName, e.name);
-                    varConditions.Add(tempC);
-                }
-            }            
-
-            for (int i = 0; i < varConditions.Count; i++)
-            {
-                if (!checkCondition(varConditions[i]))
-                    return false;
-            }
-
-            return true;
-        }
-
         public void applyOperator(Operator o)
         {
             Entity subject = storyWorld.entities.Find(x => x.name == o.operatorSubject);
@@ -288,7 +326,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             
             while (EL.Count > 0)
             {
-                Random r = new Random(DateTime.Now.Millisecond);
+                Random r = new Random();
                 int e = r.Next(0, EL.Count);
                 newEL.Add(EL[e]);
                 EL.RemoveAt(e);
@@ -302,7 +340,12 @@ namespace LudoNarrareSimpleInterfacePrototype
             List<Entity> actors = shuffleEntities(storyWorld.entities.FindAll(x => x.obligations.Count > 0 || x.goals.Count > 0 || x.behaviors.Count > 0));
 
             for (int i = 0; i < actors.Count; i++)
-                AIAct(actors[i]);
+            {
+                if (ended)
+                    break;
+                else
+                    AIAct(actors[i]);
+            }
         }
         
         /* TODO */
@@ -321,7 +364,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                 if (possibleObligations.Count > 0)
                 {
-                    Random r = new Random(DateTime.Now.Millisecond);
+                    Random r = new Random();
                     choice = possibleObligations[r.Next(0, possibleObligations.Count)].verb;
                 }        
             }
@@ -335,7 +378,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 
                 if (possibleGoalVerbs.Count > 0)
                 {
-                    Random r = new Random(DateTime.Now.Millisecond);
+                    Random r = new Random();
                     choice = possibleGoalVerbs[r.Next(0, possibleGoalVerbs.Count)].name;
                 }
             }
@@ -357,13 +400,15 @@ namespace LudoNarrareSimpleInterfacePrototype
                             ballSpinner.Add(possibleBehaviors[i].verb);
                     }
 
-                    Random r = new Random(DateTime.Now.Millisecond);
+                    Random r = new Random();
                     choice = ballSpinner[r.Next(0, ballSpinner.Count)];
                 }
             }
 
             if (choice != "Wait" && choice != "")
                 output += (tick + ": " + executeVerb(possibleActions.Find(x => x.name == choice)) + "\n");
+
+            ended = checkEndConditions();
         }
     }
 }
