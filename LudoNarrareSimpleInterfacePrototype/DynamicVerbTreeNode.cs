@@ -37,5 +37,10 @@ namespace LudoNarrareSimpleInterfacePrototype
                 return maxCandidate;
             }
         }
+
+        public override string ToString()
+        {
+            return data.name;
+        }
     }
 }

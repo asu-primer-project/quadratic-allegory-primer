@@ -39,9 +39,9 @@
             this.InterfaceSplit = new System.Windows.Forms.SplitContainer();
             this.OutputBox = new System.Windows.Forms.RichTextBox();
             this.comboBox6 = new System.Windows.Forms.ComboBox();
-            this.comboBox3 = new System.Windows.Forms.ComboBox();
-            this.comboBox4 = new System.Windows.Forms.ComboBox();
             this.comboBox5 = new System.Windows.Forms.ComboBox();
+            this.comboBox4 = new System.Windows.Forms.ComboBox();
+            this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
             this.buttonInput = new System.Windows.Forms.Button();
@@ -150,9 +150,9 @@
             // InterfaceSplit.Panel2
             // 
             this.InterfaceSplit.Panel2.Controls.Add(this.comboBox6);
-            this.InterfaceSplit.Panel2.Controls.Add(this.comboBox3);
-            this.InterfaceSplit.Panel2.Controls.Add(this.comboBox4);
             this.InterfaceSplit.Panel2.Controls.Add(this.comboBox5);
+            this.InterfaceSplit.Panel2.Controls.Add(this.comboBox4);
+            this.InterfaceSplit.Panel2.Controls.Add(this.comboBox3);
             this.InterfaceSplit.Panel2.Controls.Add(this.comboBox2);
             this.InterfaceSplit.Panel2.Controls.Add(this.comboBox1);
             this.InterfaceSplit.Panel2.Controls.Add(this.buttonInput);
@@ -182,15 +182,15 @@
             this.comboBox6.TabIndex = 8;
             this.comboBox6.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
             // 
-            // comboBox3
+            // comboBox5
             // 
-            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox3.FormattingEnabled = true;
-            this.comboBox3.Location = new System.Drawing.Point(380, 43);
-            this.comboBox3.Name = "comboBox3";
-            this.comboBox3.Size = new System.Drawing.Size(184, 21);
-            this.comboBox3.TabIndex = 7;
-            this.comboBox3.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
+            this.comboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox5.FormattingEnabled = true;
+            this.comboBox5.Location = new System.Drawing.Point(380, 43);
+            this.comboBox5.Name = "comboBox5";
+            this.comboBox5.Size = new System.Drawing.Size(184, 21);
+            this.comboBox5.TabIndex = 7;
+            this.comboBox5.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
             // 
             // comboBox4
             // 
@@ -202,15 +202,16 @@
             this.comboBox4.TabIndex = 6;
             this.comboBox4.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
             // 
-            // comboBox5
+            // comboBox3
             // 
-            this.comboBox5.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox5.FormattingEnabled = true;
-            this.comboBox5.Location = new System.Drawing.Point(0, 43);
-            this.comboBox5.Name = "comboBox5";
-            this.comboBox5.Size = new System.Drawing.Size(184, 21);
-            this.comboBox5.TabIndex = 5;
-            this.comboBox5.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
+            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox3.FormattingEnabled = true;
+            this.comboBox3.Location = new System.Drawing.Point(0, 43);
+            this.comboBox3.Name = "comboBox3";
+            this.comboBox3.Size = new System.Drawing.Size(184, 21);
+            this.comboBox3.TabIndex = 5;
+            this.comboBox3.SelectedIndexChanged += new System.EventHandler(this.comboBox5_SelectedIndexChanged);
+            this.comboBox3.SelectionChangeCommitted += new System.EventHandler(this.onVerbComboBoxChange);
             // 
             // comboBox2
             // 
@@ -308,9 +309,9 @@
         private System.Windows.Forms.ComboBox comboBox0;
         private System.Windows.Forms.Button buttonInput;
         private System.Windows.Forms.ComboBox comboBox6;
-        private System.Windows.Forms.ComboBox comboBox3;
-        private System.Windows.Forms.ComboBox comboBox4;
         private System.Windows.Forms.ComboBox comboBox5;
+        private System.Windows.Forms.ComboBox comboBox4;
+        private System.Windows.Forms.ComboBox comboBox3;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ComboBox comboBox1;
     }

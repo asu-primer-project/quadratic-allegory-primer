@@ -645,40 +645,49 @@ namespace LudoNarrareSimpleInterfacePrototype
             int maxBoxIndex = getMaxBoxIndex();
             OutputBox.Text = "Box changed! " + index;
 
+            if (index == 0)
+            {
+                // TODO: hide any extra boxes here
+            }
+
             // whenever box n is changed, reset box n+1's options, and clear all boxes > n + 1
-            
-            // Last box is special case
+            // ...unless it's the last box
             if(index != maxBoxIndex){
                 verbBoxes[index+1].DataSource = getVerbBoxOptions(index + 1);
+                for (int boxNum = index + 2; boxNum <= maxBoxIndex; boxNum++)
+                {
+                    OutputBox.Text += (" modifying box " + boxNum);
+                    verbBoxes[boxNum].DataSource = null;
+                    //verbBoxes[boxNum].Items.Clear();
+                    //verbBoxes[boxNum].ResetText();
+                }
             }
-            
         }
 
-        private List<string> getVerbBoxOptions(int depth)
+        private List<DynamicVerbTreeNode> getVerbBoxOptions(int verbBoxIndex)
         {
-            // TODO use tree to get this
-            List<string> result = new List<string>();
-
-            Verb chosenVerb = (Verb)comboBox0.SelectedValue;
-            DynamicVerbTreeNode currentNode;
-
-            for (int i = 1; i < depth; i++)
-            {
-
+            ComboBox previousBox = verbBoxes[verbBoxIndex-1];             
+            if ((verbBoxIndex-1) == 0){
+                return ((Verb)previousBox.SelectedValue).root.children;
+            }else{
+                return ((DynamicVerbTreeNode)previousBox.SelectedValue).children;
             }
-            return result;
         }
 
         private int getMaxBoxIndex()
         {
-            // TODO: Use tree for this
-            return 2;
+            return (((Verb)verbBoxes[0].SelectedValue).variables.Count) - 1;
         }
 
         //Exit program
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
             Application.Exit();
+        }
+
+        private void comboBox5_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }
