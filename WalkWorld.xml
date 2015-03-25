@@ -10,8 +10,8 @@
 	<Entity name="Robo44">
 		<Attribute name="Robot"/>
 		<Relationship name ="At" object="Room Back" />
-		<Obligation name="Move from back to middle" verb="Walk" var="Room Back" var="Room Middle" />
-		<Obligation name="Move middle to front" verb="Walk" var="Room Middle" var="Room Front" />		
+		<Obligation name="Move from back to middle" verb="Walk" var1="Room Back" var2="Room Middle" />
+		<Obligation name="Move middle to front" verb="Walk" var1="Room Middle" var2="Room Front" />		
 	</Entity>
 	
 	<!--

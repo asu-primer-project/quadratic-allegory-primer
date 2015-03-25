@@ -116,7 +116,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         temp.name = reader.Value;
                                     if (reader.Name == "verb")
                                         temp.verb = reader.Value;
-                                    if (reader.Name == "var")
+                                    if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r')
                                         temp.arguments.Add(reader.Value);
                                 }
 
@@ -182,7 +182,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         }
                                         if (reader.Name == "verb" && currentGoal.type == 2)
                                             currentGoal.obligation.verb = reader.Value;
-                                        if (reader.Name == "var" && currentGoal.type == 2)
+                                        if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentGoal.type == 2)
                                             currentGoal.obligation.arguments.Add(reader.Value);
                                     }
                                 }
@@ -203,7 +203,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                             if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
                                                 currentGoal.behavior.chance = 0;
                                         }
-                                        if (reader.Name == "var" && currentGoal.type == 4)
+                                        if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentGoal.type == 4)
                                             currentGoal.behavior.arguments.Add(reader.Value);
                                     }
                                 }
@@ -223,7 +223,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         if (!Int32.TryParse(reader.Value, out temp.chance))
                                             temp.chance = 0;
                                     }
-                                    if (reader.Name == "var")
+                                    if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r')
                                         temp.arguments.Add(reader.Value);
                                 }
 
@@ -427,7 +427,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                         }
                                         if (reader.Name == "verb" && currentOperator.type == 2)
                                             currentOperator.obligation.verb = reader.Value;
-                                        if (reader.Name == "var" && currentOperator.type == 2)
+                                        if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentOperator.type == 2)
                                             currentOperator.obligation.arguments.Add(reader.Value);
                                     }
                                 }
@@ -492,7 +492,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                             }
                                             if (reader.Name == "verb" && currentGoal.type == 2)
                                                 currentGoal.obligation.verb = reader.Value;
-                                            if (reader.Name == "var" && currentGoal.type == 2)
+                                            if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentGoal.type == 2)
                                                 currentGoal.obligation.arguments.Add(reader.Value);
                                         }
                                     }
@@ -513,7 +513,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                                 if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
                                                     currentGoal.behavior.chance = 0;
                                             }
-                                            if (reader.Name == "var" && currentGoal.type == 4)
+                                            if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentGoal.type == 4)
                                                 currentGoal.behavior.arguments.Add(reader.Value);
                                         }
                                     }
@@ -534,7 +534,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                                             if (!Int32.TryParse(reader.Value, out currentGoal.behavior.chance))
                                                 currentOperator.behavior.chance = 0;
                                         }
-                                        if (reader.Name == "var" && currentOperator.type == 4)
+                                        if (reader.Name[0] == 'v' && reader.Name[1] == 'a' && reader.Name[2] == 'r' && currentOperator.type == 4)
                                             currentOperator.behavior.arguments.Add(reader.Value);
                                     }
                                 }

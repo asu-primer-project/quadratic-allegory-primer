@@ -32,17 +32,17 @@
 	-->
 	
 	<!-- Obligation Template
-	<Obligation name="..." verb="..." var="..." />   <==== The number of "var='...'" statements matches the number of variables in the verb. Default value is ?rand.
+	<Obligation name="..." verb="..." var1="..." />   <==== The number of "var#='...'" statements matches the number of variables in the verb. Default value is ?rand.
 	-->
 
 	<!-- Goals Template
 	<Goal name="..." subject="..." type="add" || "remove">
-			<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var="..." /> || <Behavior verb="..." chance="..." var="..." />
+			<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var1="..." /> || <Behavior verb="..." chance="..." var1="..." />
 	</Goal>
 	-->
 	
 	<!-- Behavior Template
-	<Behavior name="..." verb="..." chance="..." var="..." />   <==== The number of "var='...'" statements matches the number of variables in the verb. Default value is ?rand.
+	<Behavior name="..." verb="..." chance="..." var1="..." />   <==== The number of "var#='...'" statements matches the number of variables in the verb. Default value is ?rand.
 	-->
 	
 	<!-- Story World Main Data Structures -->
