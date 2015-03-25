@@ -19,6 +19,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             name = _name;
             verb = _verb;
             arguments = new List<string>();
+            arguments.Add("?me");
         }
 
         public void copyTo(Obligation ob)

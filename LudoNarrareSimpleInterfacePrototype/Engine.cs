@@ -78,6 +78,27 @@ namespace LudoNarrareSimpleInterfacePrototype
 
         public void init()
         {
+            //Make sure all paths match their verbs.
+            for (int i = 0; i < storyWorld.entities.Count; i++ )
+            {
+                for (int j = 0; j < storyWorld.entities[i].obligations.Count; j++)
+                    checkAndFixPathSize(storyWorld.entities[i].obligations[j].arguments, storyWorld.verbs.Find(x => x.name == storyWorld.entities[i].obligations[j].verb));
+
+                for (int j = 0; j < storyWorld.entities[i].behaviors.Count; j++)
+                    checkAndFixPathSize(storyWorld.entities[i].behaviors[j].arguments, storyWorld.verbs.Find(x => x.name == storyWorld.entities[i].behaviors[j].verb));
+            }
+
+            for (int i = 0; i < storyWorld.verbs.Count; i++ )
+            {
+                for (int j = 0; j < storyWorld.verbs[i].operators.Count; j++ )
+                {
+                    if (storyWorld.verbs[i].operators[j].type == 2)
+                        checkAndFixPathSize(storyWorld.verbs[i].operators[j].obligation.arguments, storyWorld.verbs.Find(x => x.name == storyWorld.verbs[i].operators[j].obligation.verb));
+                    if (storyWorld.verbs[i].operators[j].type == 4)
+                        checkAndFixPathSize(storyWorld.verbs[i].operators[j].behavior.arguments, storyWorld.verbs.Find(x => x.name == storyWorld.verbs[i].operators[j].behavior.verb));
+                }
+            }
+
             currentUserChoices = generatePossibleVerbs(storyWorld.entities.Find(x => x.name == storyWorld.userEntity));
             waitingForInput = true;
         }
@@ -140,6 +161,84 @@ namespace LudoNarrareSimpleInterfacePrototype
             }
             else
                 return;
+        }
+
+        //Given a DVT and a path through that DVT, recursively find if the path goes through the entire DVT and fill in ?rand if found.
+        public List<string> checkDVTPath(DynamicVerbTreeNode r, List<string> path, int h)
+        {
+            if (h != path.Count)
+            {
+                if (path[h] != "?rand")
+                {
+                    DynamicVerbTreeNode next = r.children.Find(x => x.data.name == path[h]);
+
+                    if (next != null)
+                    {
+                        path = checkDVTPath(next, path, h + 1);
+                        return path;
+                    }
+                    else
+                        return null;
+                }
+                else
+                {
+                    List<int> alreadyVisited = new List<int>();
+                    List<string> newPath = null;
+
+                    for (int i = 0; i < r.children.Count; i++)
+                        alreadyVisited.Add(i);
+
+                    while (alreadyVisited.Count != 0)
+                    {
+                        Random rand = new Random();
+                        int randIndex = rand.Next(0, alreadyVisited.Count);
+                        newPath = checkDVTPath(r.children[alreadyVisited[randIndex]], path, h + 1);
+                        
+                        if (newPath != null)
+                        {
+                            newPath[h] = r.children[randIndex].data.name;
+                            break;
+                        }
+                    }
+
+                    if (newPath == null)
+                        return null;
+                    else
+                        return newPath;
+                }
+            }
+            else
+                return path;
+        }
+
+        //If check if path is longer enough and if not make it so
+        public void checkAndFixPathSize(List<string> path, Verb v)
+        {
+            if (path.Count == v.variables.Count)
+                return;
+            while (path.Count > v.variables.Count)
+                path.RemoveAt(path.Count - 1);
+            while (path.Count < v.variables.Count)
+                path.Add("?rand");
+            return;
+        }
+
+        //Returns a list of all possible paths through a DVT
+        public void findAllPossibleDVTPaths(DynamicVerbTreeNode r, List<List<string>> allPaths, List<string> currentPath, int h, int hMax)
+        {
+            if (h == hMax)
+                allPaths.Add(currentPath);
+            else
+            {
+                for (int i = 0; i < r.children.Count; i++)
+                {
+                    List<string> branch = new List<string>();
+                    for (int j = 0; j < currentPath.Count; j++)
+                        branch.Add(currentPath[j]);
+                    branch.Add(r.children[i].data.name);
+                    findAllPossibleDVTPaths(r.children[i], allPaths, branch, h + 1, hMax);
+                }
+            }
         }
 
         public List<Verb> generatePossibleVerbs(Entity e)
@@ -304,8 +403,6 @@ namespace LudoNarrareSimpleInterfacePrototype
             }
         }
 
-        /* TODO */
-        /* Rewrite to handle execution of variable verbs; handle both user variable choices and AI variable choices. */
         //Has side-effects...
         public string executeVerb(Verb v)
         {

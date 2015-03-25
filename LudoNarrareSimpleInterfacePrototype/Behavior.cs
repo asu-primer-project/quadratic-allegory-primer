@@ -21,6 +21,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             verb = _verb;
             chance = _chance;
             arguments = new List<string>();
+            arguments.Add("?me");
         }
 
         public void copyTo(Behavior b)

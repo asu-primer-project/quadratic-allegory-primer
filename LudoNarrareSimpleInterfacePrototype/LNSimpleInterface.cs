@@ -627,6 +627,10 @@ namespace LudoNarrareSimpleInterfacePrototype
                 WorldDataOutBox.Text = sw.getPrintedWorldState();
             if (engine != null)
                 OutputBox.Text = engine.output;
+
+            //Scroll to end
+            OutputBox.SelectionStart = OutputBox.Text.Length;
+            OutputBox.ScrollToCaret();
         }
 
         //Exit program

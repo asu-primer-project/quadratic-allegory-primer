@@ -6,6 +6,14 @@
 		<Attribute name="Robot"/>
 		<Relationship name ="At" object="Room Front" />			
 	</Entity>
+	
+	<Entity name="Robo44">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room Back" />
+		<Obligation name="Move from back to middle" verb="Walk" var="Room Back" var="Room Middle" />
+		<Obligation name="Move middle to front" verb="Walk" var="Room Middle" var="Room Front" />		
+	</Entity>
+	
 	<!--
 	<Entity name="Robo44">
 		<Attribute name="Robot"/>
