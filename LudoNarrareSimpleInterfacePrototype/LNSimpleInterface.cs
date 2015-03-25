@@ -19,11 +19,19 @@ namespace LudoNarrareSimpleInterfacePrototype
         private StoryWorld sw;
         private Engine engine;
         private string swFileLoc;
-        
+        private List<ComboBox> verbBoxes = new List<ComboBox>(7);
+      
         //Constructer/Setup
         public LNSimpleInterface()
         {
             InitializeComponent();
+            verbBoxes.Add(comboBox0);
+            verbBoxes.Add(comboBox1);
+            verbBoxes.Add(comboBox2);
+            verbBoxes.Add(comboBox3);
+            verbBoxes.Add(comboBox4);
+            verbBoxes.Add(comboBox5);
+            verbBoxes.Add(comboBox6);
         }
 
         //Load story world file
@@ -600,7 +608,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                 WorldDataOutBox.Text = sw.getPrintedWorldState();
                 engine = new Engine(sw);
                 engine.init();
-                comboBoxVerb.DataSource = engine.currentUserChoices;
+                comboBox0.DataSource = engine.currentUserChoices;
             }
             else
                 MessageBox.Show("Story World data could not be loaded correctly.", "Error", MessageBoxButtons.OK);
@@ -619,8 +627,8 @@ namespace LudoNarrareSimpleInterfacePrototype
         private void buttonInput_Click(object sender, EventArgs e)
         {
             //Process verb
-            engine.takeInputAndProcess(engine.currentUserChoices[comboBoxVerb.SelectedIndex]);
-            comboBoxVerb.DataSource = engine.currentUserChoices;
+            engine.takeInputAndProcess(engine.currentUserChoices[comboBox0.SelectedIndex]);
+            comboBox0.DataSource = engine.currentUserChoices;
 
             //Update output
             if (sw != null)
@@ -631,6 +639,47 @@ namespace LudoNarrareSimpleInterfacePrototype
             //Scroll to end
             OutputBox.SelectionStart = OutputBox.Text.Length;
             OutputBox.ScrollToCaret();
+        }
+
+        private void onVerbComboBoxChange(object sender, EventArgs e)
+        {
+            ComboBox changedBox = (ComboBox)sender;
+            int index = verbBoxes.IndexOf(changedBox, 0, verbBoxes.Count);
+            int maxBoxIndex = getMaxBoxIndex();
+            OutputBox.Text = "Box changed! " + index;
+            if (index == 0)
+            {
+                // TODO: hide any extra boxes here
+            }
+            // whenever box n is changed, reset box n+1's options, and clear all boxes > n + 1
+            // ...unless it's the last box
+            if (index != maxBoxIndex)
+            {
+                verbBoxes[index + 1].DataSource = getVerbBoxOptions(index + 1);
+                for (int boxNum = index + 2; boxNum <= maxBoxIndex; boxNum++)
+                {
+                    OutputBox.Text += (" modifying box " + boxNum);
+                    verbBoxes[boxNum].DataSource = null;
+                    //verbBoxes[boxNum].Items.Clear();
+                    //verbBoxes[boxNum].ResetText();
+                }
+            }
+        }
+        private List<DynamicVerbTreeNode> getVerbBoxOptions(int verbBoxIndex)
+        {
+            ComboBox previousBox = verbBoxes[verbBoxIndex - 1];
+            if ((verbBoxIndex - 1) == 0)
+            {
+                return ((Verb)previousBox.SelectedValue).root.children;
+            }
+            else
+            {
+                return ((DynamicVerbTreeNode)previousBox.SelectedValue).children;
+            }
+        }
+        private int getMaxBoxIndex()
+        {
+            return (((Verb)verbBoxes[0].SelectedValue).variables.Count) - 1;
         }
 
         //Exit program
