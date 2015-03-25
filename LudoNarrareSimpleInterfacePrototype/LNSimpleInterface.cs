@@ -649,7 +649,37 @@ namespace LudoNarrareSimpleInterfacePrototype
         {
             ComboBox changedBox = (ComboBox)sender;
             int index = verbBoxes.IndexOf(changedBox,0,verbBoxes.Count);
+            int maxBoxIndex = getMaxBoxIndex();
             OutputBox.Text = "Box changed! " + index;
+
+            // whenever box n is changed, reset box n+1's options, and clear all boxes > n + 1
+            
+            // Last box is special case
+            if(index != maxBoxIndex){
+                verbBoxes[index+1].DataSource = getVerbBoxOptions(index + 1);
+            }
+            
+        }
+
+        private List<string> getVerbBoxOptions(int depth)
+        {
+            // TODO use tree to get this
+            List<string> result = new List<string>();
+
+            Verb chosenVerb = (Verb)comboBox0.SelectedValue;
+            DynamicVerbTreeNode currentNode;
+
+            for (int i = 1; i < depth; i++)
+            {
+
+            }
+            return result;
+        }
+
+        private int getMaxBoxIndex()
+        {
+            // TODO: Use tree for this
+            return 2;
         }
 
         //Exit program
