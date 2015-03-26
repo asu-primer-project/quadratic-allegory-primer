@@ -1,63 +1,73 @@
 <?xml version="1.0"?>
+
 <StoryWorld name="Walk World" userEntity="Robo12">
 
 	<!-- Entities -->
+	<!-- Robots -->
 	<Entity name="Robo12">
 		<Attribute name="Robot"/>
-		<Relationship name ="At" object="Room Front" />			
+		<Relationship name ="At" object="Room A" />			
 	</Entity>
-	
+
 	<Entity name="Robo44">
 		<Attribute name="Robot"/>
-		<Relationship name ="At" object="Room Back" />
-		<Obligation name="Move from back to middle" verb="Walk" var1="Room Back" var2="Room Middle" />
-		<Obligation name="Move middle to front" verb="Walk" var1="Room Middle" var2="Room Front" />		
-	</Entity>
-	
-	<!--
-	<Entity name="Robo44">
-		<Attribute name="Robot"/>
-		<Relationship name ="At" object="Room Front" />
-
-		<Behavior name="Room Search" chance="1"/>
-		<Behavior name="Wait" chance="3"/>			
-	</Entity>
-	
-	<Entity name="Robo81">
-		<Attribute name="Robot"/>
-		<Relationship name ="At" object="Room Back" />
-
-		<Behavior name="Room Search" chance="1"/>
-		<Behavior name="Wait" chance="3"/>			
+		<Relationship name ="At" object="Room C" />
+		<Obligation name="Move from back to middle" verb="Walk" var1="Room C" var2="Room B" />
+		<Obligation name="Move middle to front" verb="Walk" var1="Room B" var2="Room A" />		
 	</Entity>
 	
 	<Entity name="Robo39">
 		<Attribute name="Robot"/>
-		<Relationship name ="At" object="Room Middle" />
-
-		<Behavior name="Room Search" chance="1"/>
-		<Behavior name="Wait" chance="3"/>				
+		<Relationship name ="At" object="Room B" />
+		<Behavior name="Room Search" verb="Walk" chance="2" />
+		<Behavior name="Wait" verb="Wait" chance="1" />				
 	</Entity>
-	-->
-	<Entity name="Room Front">
-		<Attribute name="Location"/>
 
-		<Relationship name ="Connected To" object="Room Middle" />
+	<Entity name="Robo81">
+		<Attribute name="Robot"/>
+		<Relationship name ="At" object="Room B" />
+		<Goal name="Go to room A" subject="Robo81" type="add">
+				<Relationship name="At" object="Room A" />
+		</Goal>
+		<Behavior name="Room Search" verb="Walk" chance="2"/>
+		<Behavior name="Wait" verb="Wait" chance="1"/>			
+	</Entity>
+
+	<!-- Rooms -->
+	<Entity name="Room A">
+		<Attribute name="Location"/>
+		<Relationship name ="Connected To" object="Room B" />
 	</Entity>
 	
-	<Entity name="Room Middle">
+	<Entity name="Room B">
 		<Attribute name="Location"/>
-		
-		<Relationship name ="Connected To" object="Room Front" />
-		<Relationship name ="Connected To" object="Room Back" />		
+		<Relationship name ="Connected To" object="Room A" />
+		<Relationship name ="Connected To" object="Room C" />
+		<Relationship name ="Connected To" object="Room F" />				
 	</Entity>	
 	
-	<Entity name="Room Back">
+	<Entity name="Room C">
 		<Attribute name="Location"/>
-
-		<Relationship name ="Connected To" object="Room Middle" />		
-	</Entity>		
-
+		<Relationship name ="Connected To" object="Room B" />		
+	</Entity>	
+	
+	<Entity name="Room D">
+		<Attribute name="Location"/>
+		<Relationship name ="Connected To" object="Room B" />		
+	</Entity>	
+	
+	<Entity name="Room E">
+		<Attribute name="Location"/>
+		<Relationship name ="Connected To" object="Room B" />
+		<Relationship name ="Connected To" object="Room F" />		
+	</Entity>
+	
+	<Entity name="Room F">
+		<Attribute name="Location"/>
+		<Relationship name ="Connected To" object="Room E" />
+		<Relationship name ="Connected To" object="Room B" />		
+	</Entity>
+	
 	<!-- Verbs -->
 	<Verb name="Walk">
 		<Variable name="?fromLocation" />

@@ -32,8 +32,9 @@ namespace LudoNarrareSimpleInterfacePrototype
 
         public void applyPath(List<string> path)
         {
-            for (int i = 0; i < path.Count; i++)
-                replaceWith(variables[i + 1], path[i]);
+            if (path != null)
+                for (int i = 1; i < path.Count; i++)
+                    replaceWith(variables[i], path[i]);
         }
 
         public void replaceWith(string replace, string with)

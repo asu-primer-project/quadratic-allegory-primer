@@ -33,7 +33,7 @@ namespace LudoNarrareSimpleInterfacePrototype
 
         public bool matchWith(Operator op)
         {
-            if (op.operatorSubject == operatorSubject && op.addRemove == addRemove && op.type == type)
+            if ((op.operatorSubject == operatorSubject || op.operatorSubject == "?me") && op.addRemove == addRemove && op.type == type)
             {
                 switch(type)
                 {

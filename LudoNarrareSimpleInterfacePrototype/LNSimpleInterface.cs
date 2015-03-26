@@ -20,6 +20,7 @@ namespace LudoNarrareSimpleInterfacePrototype
         private Engine engine;
         private string swFileLoc;
         private List<ComboBox> verbBoxes = new List<ComboBox>(7);
+        private bool inputReady;
       
         //Constructer/Setup
         public LNSimpleInterface()
@@ -605,10 +606,25 @@ namespace LudoNarrareSimpleInterfacePrototype
             //Initiate the engine with the loaded story world data.
             if (sw != null && success)
             {
-                WorldDataOutBox.Text = sw.getPrintedWorldState();
                 engine = new Engine(sw);
                 engine.init();
                 comboBox0.DataSource = engine.currentUserChoices;
+
+                //Hide all boxes
+                for (int i = 1; i < verbBoxes.Count; i++)
+                {
+                    verbBoxes[i].Enabled = false;
+                    verbBoxes[i].Visible = false;
+                }
+
+                //Unhide those that are needed
+                for (int i = 1; i <= getMaxBoxIndex(); i++)
+                {
+                    verbBoxes[i].Enabled = true;
+                    verbBoxes[i].Visible = true;
+                }
+
+                WorldDataOutBox.Text = sw.getPrintedWorldState();
             }
             else
                 MessageBox.Show("Story World data could not be loaded correctly.", "Error", MessageBoxButtons.OK);
@@ -626,19 +642,37 @@ namespace LudoNarrareSimpleInterfacePrototype
         //Process verb chosen and then update output boxes
         private void buttonInput_Click(object sender, EventArgs e)
         {
-            //Process verb
-            engine.takeInputAndProcess(engine.currentUserChoices[comboBox0.SelectedIndex]);
-            comboBox0.DataSource = engine.currentUserChoices;
+            //Check if all values are filled
+            if (inputReady)
+            {
+                //Get selected variables
+                List<string> inputVars = new List<string>();
+                for (int i = 0; i <= getMaxBoxIndex(); i++ )
+                    inputVars.Add(verbBoxes[i].SelectedValue.ToString());
 
-            //Update output
-            if (sw != null)
-                WorldDataOutBox.Text = sw.getPrintedWorldState();
-            if (engine != null)
-                OutputBox.Text = engine.output;
+                //Process verb
+                Verb tempV = engine.currentUserChoices[comboBox0.SelectedIndex];
+                if (inputVars.Count > 1)
+                    tempV.applyPath(inputVars);
+                engine.takeInputAndProcess(tempV);
 
-            //Scroll to end
-            OutputBox.SelectionStart = OutputBox.Text.Length;
-            OutputBox.ScrollToCaret();
+                //Update output
+                if (sw != null)
+                    WorldDataOutBox.Text = sw.getPrintedWorldState();
+                if (engine != null)
+                    OutputBox.Text = engine.output;
+
+                //Scroll to end
+                OutputBox.SelectionStart = OutputBox.Text.Length;
+                OutputBox.ScrollToCaret();
+
+                //Input not ready
+                for (int i = 0; i < verbBoxes.Count; i++)
+                    verbBoxes[i].DataSource = null;
+                comboBox0.DataSource = engine.currentUserChoices;
+                inputReady = false;
+                buttonInput.Enabled = false;
+            }
         }
 
         private void onVerbComboBoxChange(object sender, EventArgs e)
@@ -646,10 +680,22 @@ namespace LudoNarrareSimpleInterfacePrototype
             ComboBox changedBox = (ComboBox)sender;
             int index = verbBoxes.IndexOf(changedBox, 0, verbBoxes.Count);
             int maxBoxIndex = getMaxBoxIndex();
-            OutputBox.Text = "Box changed! " + index;
+            //OutputBox.Text = "Box changed! " + index;
             if (index == 0)
             {
-                // TODO: hide any extra boxes here
+                //Hide all boxes
+                for (int i = 1; i < verbBoxes.Count; i++)
+                {
+                    verbBoxes[i].Enabled = false;
+                    verbBoxes[i].Visible = false;
+                }
+                
+                //Unhide those that are needed
+                for (int i = 1; i <= maxBoxIndex; i++)
+                {
+                    verbBoxes[i].Enabled = true;
+                    verbBoxes[i].Visible = true;
+                }
             }
             // whenever box n is changed, reset box n+1's options, and clear all boxes > n + 1
             // ...unless it's the last box
@@ -658,11 +704,18 @@ namespace LudoNarrareSimpleInterfacePrototype
                 verbBoxes[index + 1].DataSource = getVerbBoxOptions(index + 1);
                 for (int boxNum = index + 2; boxNum <= maxBoxIndex; boxNum++)
                 {
-                    OutputBox.Text += (" modifying box " + boxNum);
+                    //OutputBox.Text += (" modifying box " + boxNum);
                     verbBoxes[boxNum].DataSource = null;
                     //verbBoxes[boxNum].Items.Clear();
                     //verbBoxes[boxNum].ResetText();
                 }
+                inputReady = false;
+                buttonInput.Enabled = false;
+            }
+            else
+            {
+                inputReady = true;
+                buttonInput.Enabled = true;
             }
         }
         private List<DynamicVerbTreeNode> getVerbBoxOptions(int verbBoxIndex)

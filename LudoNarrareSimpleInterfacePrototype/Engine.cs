@@ -15,6 +15,7 @@ namespace LudoNarrareSimpleInterfacePrototype
         public bool waitingForInput;
         public List<Verb> currentUserChoices;
         public bool ended;
+        public Random rand;
 
         /* Functions */
         public Engine(StoryWorld _storyWorld)
@@ -25,6 +26,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             waitingForInput = false;
             currentUserChoices = null;
             ended = false;
+            rand = new Random();
         }
 
         public bool checkEndConditions()
@@ -163,7 +165,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                 return;
         }
 
-        //Given a DVT and a path through that DVT, recursively find if the path goes through the entire DVT and fill in ?rand if found.
+        //Given a DVT and a path through that DVT, recursively find if the path goes through the entire DVT and fill in ?rand if found, h should be 1
         public List<string> checkDVTPath(DynamicVerbTreeNode r, List<string> path, int h)
         {
             if (h != path.Count)
@@ -183,16 +185,18 @@ namespace LudoNarrareSimpleInterfacePrototype
                 else
                 {
                     List<int> alreadyVisited = new List<int>();
-                    List<string> newPath = null;
+                    List<string> newPath = new List<string>();
 
                     for (int i = 0; i < r.children.Count; i++)
                         alreadyVisited.Add(i);
 
                     while (alreadyVisited.Count != 0)
                     {
-                        Random rand = new Random();
                         int randIndex = rand.Next(0, alreadyVisited.Count);
-                        newPath = checkDVTPath(r.children[alreadyVisited[randIndex]], path, h + 1);
+                        for (int i = 0; i < path.Count; i++)
+                            newPath.Add(path[i]);
+
+                        newPath = checkDVTPath(r.children[alreadyVisited[randIndex]], newPath, h + 1);
                         
                         if (newPath != null)
                         {
@@ -211,7 +215,7 @@ namespace LudoNarrareSimpleInterfacePrototype
                 return path;
         }
 
-        //If check if path is longer enough and if not make it so
+        //If check if path is longer enough and if not make it so, has side effects
         public void checkAndFixPathSize(List<string> path, Verb v)
         {
             if (path.Count == v.variables.Count)
@@ -223,7 +227,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             return;
         }
 
-        //Returns a list of all possible paths through a DVT
+        //Returns a list of all possible paths through a DVT, allPaths and currentPath should be new path DS's, h should be 1, hMax should be getHeight(), has side effects
         public void findAllPossibleDVTPaths(DynamicVerbTreeNode r, List<List<string>> allPaths, List<string> currentPath, int h, int hMax)
         {
             if (h == hMax)
@@ -423,8 +427,7 @@ namespace LudoNarrareSimpleInterfacePrototype
             
             while (EL.Count > 0)
             {
-                Random r = new Random();
-                int e = r.Next(0, EL.Count);
+                int e = rand.Next(0, EL.Count);
                 newEL.Add(EL[e]);
                 EL.RemoveAt(e);
             }
@@ -450,60 +453,134 @@ namespace LudoNarrareSimpleInterfacePrototype
         public void AIAct(Entity e)
         {
             List<Verb> possibleActions = generatePossibleVerbs(e);
-            string choice = "";
+            Verb choice = null;
 
             //Any obligations?
             if (e.obligations.Count > 0)
             {
-                List<Obligation> possibleObligations = new List<Obligation>();
+                List<Verb> PAO = new List<Verb>();
                 for (int i = 0; i < possibleActions.Count; i++ )
-                    possibleObligations.AddRange(e.obligations.FindAll(x => x.verb == possibleActions[i].name));
+                    PAO.Add(possibleActions[i]);
 
+                List<Obligation> possibleObligations = new List<Obligation>();
+                for (int i = 0; i < PAO.Count; i++)
+                    possibleObligations.AddRange(e.obligations.FindAll(x => x.verb == PAO[i].name));
+                
                 if (possibleObligations.Count > 0)
                 {
-                    Random r = new Random();
-                    choice = possibleObligations[r.Next(0, possibleObligations.Count)].verb;
+                    List<int> indexes = new List<int>();
+                    for (int i = 0; i < possibleObligations.Count; i++)
+                        indexes.Add(i);
+                    int index = rand.Next(0, indexes.Count);
+                    Verb tempV = PAO.Find(x => x.name == possibleObligations[indexes[index]].verb);
+
+                    if (tempV.variables.Count > 1)
+                    {
+                        List<string> path = checkDVTPath(tempV.root, possibleObligations[indexes[index]].arguments, 1);
+
+                        //Check that the path constraints match the possiblities
+                        while (path == null && tempV.variables.Count > 1)
+                        {
+                            indexes.RemoveAt(index);
+                            if (indexes.Count == 0)
+                                break;
+                            index = rand.Next(0, indexes.Count);
+                            tempV = PAO.Find(x => x.name == possibleObligations[indexes[index]].verb);
+                            if (tempV.variables.Count > 1)
+                                path = checkDVTPath(tempV.root, possibleObligations[indexes[index]].arguments, 1);
+                        }
+
+                        if (indexes.Count != 0 && tempV.variables.Count > 1)
+                            tempV.applyPath(path);
+                    }
+
+                    if (indexes.Count != 0)
+                        choice = tempV;
                 }        
             }
 
             //Any goals?
-            if (choice == "" && e.goals.Count > 0)
+            if (choice == null && e.goals.Count > 0)
             {
+                List<Verb> PAG = new List<Verb>();
+                List<Verb> PAGJr = new List<Verb>();
+                for (int i = 0; i < possibleActions.Count; i++)
+                    PAG.Add(possibleActions[i]);
+
                 List<Verb> possibleGoalVerbs = new List<Verb>();
-                for (int i = 0; i < e.goals.Count; i++ )
-                    possibleGoalVerbs.AddRange(possibleActions.FindAll(x => x.operators.Find(y => e.goals[i].matchWith(y)) != null));          
+
+                //Enumerate all dynamic verbs and add to the list
+                for (int i = 0; i < PAG.Count; i++)
+                {
+                    if (PAG[i].variables.Count > 1)
+                    {
+                        List<List<string>> pp = new List<List<string>>();
+                        findAllPossibleDVTPaths(PAG[i].root, pp, new List<string>(), 0, PAG[i].root.getHeight(0));
+                        
+                        for (int j = 0; j < pp.Count; j++ )
+                        {
+                            pp[j].Insert(0, e.name);
+                            Verb newV = new Verb("");
+                            PAG[i].copyTo(newV);
+                            newV.applyPath(pp[j]);
+                            PAGJr.Add(newV);
+                        }
+                    }
+                }
+
+                PAG.AddRange(PAGJr);
+
+                for (int i = 0; i < e.goals.Count; i++)
+                    possibleGoalVerbs.AddRange(PAG.FindAll(x => x.operators.Find(y => e.goals[i].matchWith(y)) != null));
 
                 if (possibleGoalVerbs.Count > 0)
-                {
-                    Random r = new Random();
-                    choice = possibleGoalVerbs[r.Next(0, possibleGoalVerbs.Count)].name;
-                }
+                    choice = possibleGoalVerbs[rand.Next(0, possibleGoalVerbs.Count)];
             }
 
             //Any behaviors?
-            if (choice == "" && e.behaviors.Count > 0)
+            if (choice == null && e.behaviors.Count > 0)
             {
                 List<Behavior> possibleBehaviors = new List<Behavior>();
                 for (int i = 0; i < possibleActions.Count; i++)
                     possibleBehaviors.AddRange(e.behaviors.FindAll(x => x.verb == possibleActions[i].name));
 
+                //Clear out those behaviors that don't match their paths
+                for (int i = 0; i < possibleBehaviors.Count; i++ )
+                {
+                    if (possibleBehaviors[i].arguments.Count > 1)
+                    {
+                        Verb tempV = possibleActions.Find(x => x.name == possibleBehaviors[i].name);
+
+                        if (tempV != null)
+                            if (checkDVTPath(tempV.root, possibleBehaviors[i].arguments, 1) == null)
+                                possibleBehaviors.RemoveAt(i);
+                    }
+                }
+
                 if (possibleBehaviors.Count > 0)
                 {
-                    List<string> ballSpinner = new List<string>();
-                    
-                    for (int i = 0; i < possibleBehaviors.Count; i++ )
+                    List<Behavior> ballSpinner = new List<Behavior>();
+
+                    for (int i = 0; i < possibleBehaviors.Count; i++)
                     {
                         for (int j = 0; j < possibleBehaviors[i].chance; j++)
-                            ballSpinner.Add(possibleBehaviors[i].verb);
+                            ballSpinner.Add(possibleBehaviors[i]);
                     }
+                    
+                    int index = rand.Next(0, ballSpinner.Count);
+                    choice = possibleActions.Find(x => x.name == ballSpinner[index].verb);
 
-                    Random r = new Random();
-                    choice = ballSpinner[r.Next(0, ballSpinner.Count)];
+                    if (ballSpinner[index].arguments.Count > 1)
+                        choice.applyPath(checkDVTPath(choice.root, ballSpinner[index].arguments, 1));
                 }
             }
 
-            if (choice != "Wait" && choice != "")
-                output += (tick + ": " + executeVerb(possibleActions.Find(x => x.name == choice)) + "\n");
+            //Execute verbs
+            if (choice != null)
+            {
+                if (choice.name != "Wait")
+                    output += (tick + ": " + executeVerb(choice) + "\n");
+            }
 
             ended = checkEndConditions();
         }

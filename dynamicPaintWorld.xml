@@ -1,6 +1,52 @@
 <?xml version="1.0"?>
 <!-- Template for LudoNarrare story world definition file -->
-<StoryWorld name="..." userEntity="...">
+<StoryWorld name="Dynamic Paint World" userEntity="Jane">
+
+	<!-- People -->
+	<Entity name="Jane">
+		<Attribute name="hasInventory"/>
+		<Attribute name="paintable" />
+		<Relationship name="isColor" object="Red"/>
+	</Entity>
+
+	<!-- Colors -->
+	<Entity name="Red"><Attribute name="color" /></Entity>
+	<Entity name="Yellow"><Attribute name="color" /></Entity>
+	<Entity name="Orange"><Attribute name="color" /></Entity>
+	<Entity name="Green"><Attribute name="color" /></Entity>
+	<Entity name="Blue"><Attribute name="color" /></Entity>
+	<Entity name="Purple"><Attribute name="color" /></Entity>
+	
+	<!-- Misc -->
+	<Entity name="Paintbrush"/>
+		<Attribute name="pickupable" />
+	</Entity>
+	
+	<!-- Verbs -->
+	<Verb name="Pick Up">
+		<Variable name="?toPickUp" />
+		
+		<In text="pick up" />
+		<In text="?toPickUp" />
+		
+		<Out text="?me" />
+		<Out text="picks up" />
+		<Out text="?toPickUp" />
+		
+		<Condition name="Pick up is pickupable" subject="?toPickUp" negate="false">
+			<Attribute name="pickupable" />
+		</Condition>
+		<Condition name="I can pick up things" subject="?me" negate="false">
+			<Attribute name="hasInventory" />
+		</Condition>
+		<Condition name="Pick up is not already picked up" subject="?toPickUp" negate="true">
+			<Relationship name="ownedBy" object="?any" />
+		</Condition>
+		
+		<Operator name="" subject="?me" type="add">
+			<Attribute name="..." /> || <Relationship name="..." object="..." /> || <Obligation verb="..." var="..." /> || <Behavior verb="..." chance="..." var="..." /> || For Goal Reference Below
+		</Operator>
+	</Verb>
 	
 	<!-- Story World Attributes -->
 	<!-- Begin Text Template
